@@ -27,6 +27,11 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := Context{
+		Request: r,
+		Session: sess,
+	}
+
 	accID, ok := sess.Values["accountID"].(string)
 	if ok {
 		if !bson.IsObjectIdHex(accID) {
@@ -39,14 +44,10 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ctx := Context{
-			Request: r,
-			Account: acc,
-			Session: sess,
-		}
-
-		context.Set(r, "context", &ctx)
+		ctx.Account = acc
 	}
+
+	context.Set(r, "context", &ctx)
 
 	s.Router.ServeHTTP(w, r)
 }
