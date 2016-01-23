@@ -9,6 +9,7 @@ import (
 
 type Document struct {
 	ID          bson.ObjectId `bson:"_id"`
+	ProjectID   bson.ObjectId `bson:"project_id"`
 	ShortID     string        `bson:"short_id"`
 	Title       string        `bson:"title"`
 	Content     string        `bson:"content"`
@@ -32,10 +33,10 @@ func GetDocument(id bson.ObjectId) (*Document, error) {
 	return &doc, nil
 }
 
-func ListDocuments(id bson.ObjectId, skip, limit int) ([]Document, error) {
+func ListDocumentsProject(projectID bson.ObjectId, skip, limit int) ([]Document, error) {
 	docs := []Document{}
 	err := sess.DB("").C(documentC).
-		FindId(id).
+		Find(bson.M{"project_id": projectID}).
 		Skip(skip).
 		Limit(limit).
 		Sort("-created_at").
