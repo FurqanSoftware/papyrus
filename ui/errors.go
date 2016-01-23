@@ -18,6 +18,14 @@ func ServeInternalServerError(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 }
 
+func RedirectBack(w http.ResponseWriter, r *http.Request) {
+	url := r.Referer()
+	if url == "" {
+		url = "/"
+	}
+	http.Redirect(w, r, url, http.StatusSeeOther)
+}
+
 func catch(r *http.Request, err error) {
 	if err != nil {
 		panic(err)
