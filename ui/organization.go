@@ -10,6 +10,28 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+func ServeOrganizationList(w http.ResponseWriter, r *http.Request) {
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
+	acc := ctx.Account
+
+	orgs, err := data.ListOraganizationsOwner(acc.ID, 0, math.MaxInt32)
+	catch(r, err)
+
+	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
+	ServeHTMLTemplate(w, r, tplServeOrganizationList, struct {
+		Context       *Context
+		Organizations []data.Organization
+	}{
+		Context:       ctx,
+		Organizations: orgs,
+	})
+}
+
 func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 	ctx := GetContext(r)
 
@@ -52,5 +74,6 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
+	Router.NewRoute().Methods("GET").Path("/organizations").HandlerFunc(ServeOrganizationList)
 	Router.NewRoute().Methods("GET").Path("/organizations/{id}").HandlerFunc(ServeOrganization)
 }
