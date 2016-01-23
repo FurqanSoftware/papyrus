@@ -4,6 +4,7 @@ import (
 	"math"
 	"mime"
 	"net/http"
+	"time"
 
 	"github.com/gophergala2016/papyrus/data"
 	"github.com/gorilla/mux"
@@ -207,6 +208,15 @@ func HandleProjectCreate(w http.ResponseWriter, r *http.Request) {
 		OrganizationID: org.ID,
 	}
 	err = prj.Put()
+	catch(r, err)
+
+	mem := data.Memeber{
+		ProjectID: prj.ID,
+		AccountID: prj.OwnerID,
+		InviterID: prj.OwnerID,
+		InvitedAt: time.Now(),
+	}
+	err = mem.Put()
 	catch(r, err)
 
 	http.Redirect(w, r, "/projects/"+prj.ID.Hex(), http.StatusSeeOther)
