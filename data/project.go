@@ -57,6 +57,10 @@ func (p *Project) Members() ([]Memeber, error) {
 	return mems, nil
 }
 
+func (p *Project) Organization() (*Organization, error) {
+	return GetOraganization(p.OrganizationID)
+}
+
 func (p *Project) Put() error {
 	p.ModifiedAt = time.Now()
 
