@@ -58,8 +58,11 @@ func (p RetainOp) TransformDelete(q DeleteOp) (Op, Op, Op, Op) {
 	case int(p) > int(q):
 		return Noop, q, p - RetainOp(q), Noop
 
+	case int(p) < int(q):
+		return Noop, DeleteOp(p), Noop, q - DeleteOp(p)
+
 	default:
-		return Noop, p, Noop, RetainOp(q) - p
+		return Noop, DeleteOp(p), Noop, Noop
 	}
 }
 
