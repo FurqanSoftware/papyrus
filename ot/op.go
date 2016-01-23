@@ -114,7 +114,7 @@ func (p DeleteOp) TransformRetain(q RetainOp) (Op, Op, Op, Op) {
 		return q, Noop, p - DeleteOp(q), Noop
 
 	default:
-		return RetainOp(p), Noop, Noop, q - RetainOp(p)
+		return DeleteOp(p), Noop, Noop, q - RetainOp(p)
 	}
 }
 
