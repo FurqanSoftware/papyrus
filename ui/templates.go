@@ -18,4 +18,6 @@ func ServeHTMLTemplate(w http.ResponseWriter, r *http.Request, tpl *template.Tem
 
 var (
 	tplLayout = template.Must(template.New("layout.html").ParseFiles("ui/templates/layout.html", "ui/templates/common.html"))
+
+	tplIndex = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/index.html"))
 )
