@@ -18,6 +18,10 @@ func ServeInternalServerError(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 }
 
+func ServeForbidden(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "Forbidden", http.StatusForbidden)
+}
+
 func RedirectBack(w http.ResponseWriter, r *http.Request) {
 	url := r.Referer()
 	if url == "" {
