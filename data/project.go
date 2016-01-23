@@ -10,8 +10,8 @@ import (
 type Project struct {
 	ID         bson.ObjectId   `bson:"_id"`
 	Name       string          `bson:"name"`
-	OwnerId    bson.ObjectId   `bson:"owner_id"`
-	MemberIds  []bson.ObjectId `bson:"member_ids"`
+	OwnerID    bson.ObjectId   `bson:"owner_id"`
+	MemberIDs  []bson.ObjectId `bson:"member_ids"`
 	CreatedAt  time.Time       `bson:"created_at"`
 	ModifiedAt time.Time       `bson:"modified_at"`
 }
@@ -26,4 +26,15 @@ func GetProject(id bson.ObjectId) (*Project, error) {
 		return nil, err
 	}
 	return &pro, nil
+}
+
+func (p *Project) Put() error {
+	p.ModifiedAt = time.Now()
+
+	if p.ID == "" {
+		p.ID = bson.NewObjectId()
+		p.CreatedAt = p.ModifiedAt
+	}
+	_, err := sess.DB("").C(organizationC).UpsertId(p.ID, p)
+	return err
 }
