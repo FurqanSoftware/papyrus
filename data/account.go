@@ -38,7 +38,7 @@ func GetAccountEmail(addr string) (*Account, error) {
 		return nil, nil
 	}
 	acc := Account{}
-	err = sess.DB("").C(accountC).Find(bson.M{"emails": addr}).One(&acc)
+	err = sess.DB("").C(accountC).Find(bson.M{"emails.address_norm": addr}).One(&acc)
 	if err == mgo.ErrNotFound {
 		return nil, nil
 	}
