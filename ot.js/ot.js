@@ -157,28 +157,28 @@ function opsCompose(u, v) {
 
 	var z = []
 
-	var l = new Cursor(u)
-	var r = new Cursor(v)
-	while(!l.fin() || !r.fin()) {
-		var a = l.op()
-		var b = r.op()
+	var l = newCursor(u)
+	var r = newCursor(v)
+	while(!cursorFin(l) || !cursorFin(r)) {
+		var a = cursorOp(l)
+		var b = cursorOp(r)
 
 		switch(true) {
 		case opType(a) === 'delete':
 			z.push(a)
-			l.next(noop)
+			cursorNext(l, noop)
 			continue
 
 		case opType(b) === 'insert':
 			z.push(b)
-			r.next(noop)
+			cursorNext(r, noop)
 			continue
 		}
 
-		if(l.fin()) {
+		if(cursorFin(l)) {
 			throw errTooShort
 		}
-		if(r.fin()) {
+		if(cursorFin(r)) {
 			throw errTooLong
 		}
 
@@ -214,8 +214,8 @@ function opsCompose(u, v) {
 		}
 
 		z.push(c)
-		l.next(p)
-		r.next(q)
+		cursorNext(l, p)
+		cursorNext(r, q)
 	}
 
 	return z
@@ -229,30 +229,30 @@ function opsTransform(u, v) {
 	var up = []
 	var vp = []
 
-	var l = new Cursor(u)
-	var r = new Cursor(v)
-	while(!l.fin() || !r.fin()) {
-		var a = l.op()
-		var b = r.op()
+	var l = newCursor(u)
+	var r = newCursor(v)
+	while(!cursorFin(l) || !cursorFin(r)) {
+		var a = cursorOp(l)
+		var b = cursorOp(r)
 
 		switch(true) {
 		case opType(a) === 'insert':
 			up.push(a)
 			vp.push(opSpan(a))
-			l.next(noop)
+			cursorNext(l, noop)
 			continue
 
 		case opType(b) === 'insert':
 			up.push(opSpan(b))
 			vp.push(b)
-			r.next(noop)
+			cursorNext(r, noop)
 			continue
 		}
 
-		if(l.fin()) {
+		if(cursorFin(l)) {
 			throw errTooShort
 		}
-		if(r.fin()) {
+		if(cursorFin(r)) {
 			throw errTooLong
 		}
 
@@ -293,37 +293,40 @@ function opsTransform(u, v) {
 		if(d != noop) {
 			vp.push(d)
 		}
-		l.next(p)
-		r.next(q)
+		cursorNext(l, p)
+		cursorNext(r, q)
 	}
 
 	return [up, vp]
 }
 
-function Cursor(ops) {
-	this.ops = ops
-	this.nxt = null
-	this.i = 0
-}
-Cursor.prototype = {
-	next: function(p) {
-		this.nxt = p
-		if(this.nxt == noop) {
-			this.i++
-		}
-	},
-	op: function() {
-		if(this.i >= this.ops.length) {
-			return noop
-		}
-		if(this.nxt != noop && this.nxt != null) {
-			return this.nxt
-		}
-		return this.ops[this.i]
-	},
-	fin: function() {
-		return this.i >= this.ops.length
+function newCursor(ops) {
+	return {
+		ops: ops,
+		nxt: null,
+		i: 0
 	}
+}
+
+function cursorNext(c, p) {
+	c.nxt = p
+	if(c.nxt == noop) {
+		c.i++
+	}
+}
+
+function cursorOp(c) {
+	if(c.i >= c.ops.length) {
+		return noop
+	}
+	if(c.nxt != noop && c.nxt != null) {
+		return c.nxt
+	}
+	return c.ops[c.i]
+}
+
+function cursorFin(c) {
+	return c.i >= c.ops.length
 }
 
 try {
