@@ -126,3 +126,141 @@ function opTransformDeleteDelete(p, q) {
 		return [noop, noop, noop, noop]
 	}
 }
+
+function opsSpanBase(u) {
+	var l = 0
+	u.forEach(function(o) {
+		if(opType(o) == 'insert') {
+			return
+		}
+		l += opSpan(o)
+	})
+	return l
+}
+
+function opsSpanTarget(u) {
+	var l = 0
+	u.forEach(function(o) {
+		if(opType(o) == 'delete') {
+			l -= opSpan(o)
+		} else {
+			l += opSpan(o)
+		}
+	})
+	return l
+}
+
+function opsCompose(u, v) {
+	if(opsSpanTarget(u) != opsSpanBase(v)) {
+		throw errBadSpans
+	}
+
+	var z = []
+
+	var l = new Cursor(u)
+	var r = new Cursor(v)
+	while(!l.fin() || !r.fin()) {
+		var a = l.op()
+		var b = r.op()
+
+		switch(true) {
+		case opType(a) === 'delete':
+			z.push(a)
+			l.next(noop)
+			continue
+
+		case opType(b) === 'insert':
+			z.push(b)
+			r.next(noop)
+			continue
+		}
+
+		if(l.fin()) {
+			throw errTooShort
+		}
+		if(r.fin()) {
+			throw errTooLong
+		}
+
+		var c, p, q
+		switch(opType(b)) {
+		case 'retain':
+			var e
+			switch(opType(a)) {
+			case 'retain':
+				 e = opComposeRetainRetain(a, b)
+				 break
+
+			case 'insert':
+				 e = opComposeInsertRetain(a, b)
+				 break
+			}
+			c = e[0], p = e[1], q = e[2]
+			break
+
+		case 'delete':
+			var e
+			switch(opType(a)) {
+			case 'retain':
+				e = opComposeRetainDelete(a, b)
+				break
+
+			case 'insert':
+				e = opComposeInsertDelete(a, b)
+				break
+			}
+			c = e[0], p = e[1], q = e[2]
+			break
+		}
+
+		z.push(c)
+		l.next(p)
+		r.next(q)
+	}
+
+	return z
+}
+
+function Cursor(ops) {
+	this.ops = ops
+	this.nxt = null
+	this.i = 0
+}
+Cursor.prototype = {
+	next: function(p) {
+		this.nxt = p
+		if(this.nxt == noop) {
+			this.i++
+		}
+	},
+	op: function() {
+		if(this.i >= this.ops.length) {
+			return noop
+		}
+		if(this.nxt != noop && this.nxt != null) {
+			return this.nxt
+		}
+		return this.ops[this.i]
+	},
+	fin: function() {
+		return this.i >= this.ops.length
+	}
+}
+
+try {
+	module.exports = {
+		opType: opType,
+		opSpan: opSpan,
+		opComposeRetainRetain: opComposeRetainRetain,
+		opComposeRetainDelete: opComposeRetainDelete,
+		opTransformRetainRetain: opTransformRetainRetain,
+		opTransformRetainDelete: opTransformRetainDelete,
+		opComposeInsertRetain: opComposeInsertRetain,
+		opComposeInsertDelete: opComposeInsertDelete,
+		opTransformDeleteRetain: opTransformDeleteRetain,
+		opTransformDeleteDelete: opTransformDeleteDelete,
+		opsSpanBase: opsSpanBase,
+		opsSpanTarget: opsSpanTarget,
+		opsCompose: opsCompose
+	}
+} catch(e) {}
