@@ -38,7 +38,14 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ServeInternalServerError(w, r)
 			return
 		}
-		context.Set(r, "account", acc)
+
+		ctx := Context{
+			Request: r,
+			Account: acc,
+			Session: sess,
+		}
+
+		context.Set(r, "context", &ctx)
 	}
 
 	s.Router.ServeHTTP(w, r)
