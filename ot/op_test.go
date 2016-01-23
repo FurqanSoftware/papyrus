@@ -225,3 +225,42 @@ func TestDeleteOpTransformRetain(t *testing.T) {
 		}
 	}
 }
+
+func TestRetainOpTransformDelete(t *testing.T) {
+	cases := []struct {
+		ret RetainOp
+		del DeleteOp
+		exp [4]Op
+	}{
+		{
+			ret: 6,
+			del: 6,
+			exp: [4]Op{Noop, DeleteOp(6), Noop, Noop},
+		},
+		{
+			ret: 6,
+			del: 3,
+			exp: [4]Op{Noop, DeleteOp(3), RetainOp(3), Noop},
+		},
+		{
+			ret: 6,
+			del: 9,
+			exp: [4]Op{Noop, DeleteOp(6), Noop, DeleteOp(3)},
+		},
+	}
+	for i, c := range cases {
+		x, y, p, q := c.ret.TransformDelete(c.del)
+		if x != c.exp[0] {
+			t.Fatalf("%d: expected x == %#v, got %#v", i, c.exp[0], x)
+		}
+		if y != c.exp[1] {
+			t.Fatalf("%d: expected y == %#v, got %#v", i, c.exp[1], y)
+		}
+		if p != c.exp[2] {
+			t.Fatalf("%d: expected p == %#v, got %#v", i, c.exp[1], p)
+		}
+		if q != c.exp[3] {
+			t.Fatalf("%d: expected q == %#v, got %#v", i, c.exp[2], q)
+		}
+	}
+}
