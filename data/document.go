@@ -32,6 +32,20 @@ func GetDocument(id bson.ObjectId) (*Document, error) {
 	return &doc, nil
 }
 
+func ListDocuments(id bson.ObjectId, skip, limit int) ([]Document, error) {
+	docs := []Document{}
+	err := sess.DB("").C(documentC).
+		FindId(id).
+		Skip(skip).
+		Limit(limit).
+		Sort("-created_at").
+		All(docs)
+	if err != nil {
+		return nil, err
+	}
+	return docs, nil
+}
+
 func (d *Document) Put() error {
 	d.ModifiedAt = time.Now()
 
