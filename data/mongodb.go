@@ -9,6 +9,7 @@ const (
 	organizationC = "organizations"
 	projectC      = "projects"
 	memberC       = "members"
+	documentC     = "documents"
 )
 
 func OpenDBSession(url string) (err error) {
