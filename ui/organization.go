@@ -7,6 +7,7 @@ import (
 
 	"github.com/gophergala2016/papyrus/data"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -45,6 +46,40 @@ func ServeOrganizationNew(w http.ResponseWriter, r *http.Request) {
 	}{
 		Context: ctx,
 	})
+}
+
+func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+
+	err := r.ParseForm()
+	catch(r, err)
+
+	body := struct {
+		Name string `schema:"name"`
+	}{}
+
+	err = schema.NewDecoder().Decode(&body, r.PostForm)
+	catch(r, err)
+
+	switch {
+	case body.Name == "":
+		RedirectBack(w, r)
+		return
+	}
+
+	org := data.Organization{
+		Name:      body.Name,
+		OwnerID:   ctx.Account.ID,
+		CreatorID: ctx.Account.ID,
+	}
+	err = org.Put()
+	catch(r, err)
+
+	http.Redirect(w, r, "/organizations/"+org.ID.Hex(), http.StatusSeeOther)
 }
 
 func ServeOrganization(w http.ResponseWriter, r *http.Request) {
@@ -91,5 +126,6 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 func init() {
 	Router.NewRoute().Methods("GET").Path("/organizations").HandlerFunc(ServeOrganizationList)
 	Router.NewRoute().Methods("GET").Path("/organizations/new").HandlerFunc(ServeOrganizationNew)
+	Router.NewRoute().Methods("POST").Path("/organizations/new").HandlerFunc(HandleOrganizationCreate)
 	Router.NewRoute().Methods("GET").Path("/organizations/{id}").HandlerFunc(ServeOrganization)
 }
