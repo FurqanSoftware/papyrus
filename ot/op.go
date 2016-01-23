@@ -111,10 +111,10 @@ func (p DeleteOp) Span() int {
 func (p DeleteOp) TransformRetain(q RetainOp) (Op, Op, Op, Op) {
 	switch {
 	case int(p) > int(q):
-		return q, Noop, p - DeleteOp(q), Noop
+		return DeleteOp(q), Noop, p - DeleteOp(q), Noop
 
 	default:
-		return DeleteOp(p), Noop, Noop, q - RetainOp(p)
+		return p, Noop, Noop, q - RetainOp(p)
 	}
 }
 
