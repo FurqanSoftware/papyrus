@@ -48,7 +48,7 @@ func GetProject(id bson.ObjectId) (*Project, error) {
 func (p *Project) Members() ([]Memeber, error) {
 	mems := []Memeber{}
 	err := sess.DB("").C(memberC).
-		Find(bson.M{"_id": bson.M{"$in": p.MemberIDs}}).
+		Find(bson.M{"project_id": p.ID}).
 		All(&mems)
 
 	if err != nil {
