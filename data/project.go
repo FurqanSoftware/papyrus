@@ -45,6 +45,18 @@ func GetProject(id bson.ObjectId) (*Project, error) {
 	return &pro, nil
 }
 
+func (p *Project) Members() ([]Memeber, error) {
+	mems := []Memeber{}
+	err := sess.DB("").C(memberC).
+		Find(bson.M{"_id": bson.M{"$in": p.MemberIDs}}).
+		All(&mems)
+
+	if err != nil {
+		return nil, err
+	}
+	return mems, nil
+}
+
 func (p *Project) Put() error {
 	p.ModifiedAt = time.Now()
 
