@@ -49,6 +49,14 @@ func GetAccountEmail(addr string) (*Account, error) {
 	return &acc, nil
 }
 
+func (a *Account) NOrganizations() (int, error) {
+	n, err := sess.DB("").C(organizationC).Find(bson.M{"owner_id": a.ID}).Count()
+	if err != nil {
+		return 0, err
+	}
+	return n, nil
+}
+
 func (a *Account) Organizations() ([]Organization, error) {
 	orgs, err := ListOraganizationsOwner(a.ID, 0, math.MaxInt32)
 	if err != nil {
