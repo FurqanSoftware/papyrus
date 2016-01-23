@@ -9,7 +9,7 @@ import (
 
 type Document struct {
 	ID          bson.ObjectId `bson:"_id"`
-	ShortId     string        `bson:"short_id"`
+	ShortID     string        `bson:"short_id"`
 	Title       string        `bson:"title"`
 	Content     string        `bson:"content"`
 	Tags        []string      `bson:"tags"`
@@ -30,4 +30,15 @@ func GetDocument(id bson.ObjectId) (*Document, error) {
 		return nil, err
 	}
 	return &doc, nil
+}
+
+func (d *Document) Put() error {
+	d.ModifiedAt = time.Now()
+
+	if d.ID == "" {
+		d.ID = bson.NewObjectId()
+		d.CreatedAt = d.ModifiedAt
+	}
+	_, err := sess.DB("").C(documentC).UpsertId(d.ID, d)
+	return err
 }
