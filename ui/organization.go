@@ -79,7 +79,7 @@ func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request) {
 	err = org.Put()
 	catch(r, err)
 
-	http.Redirect(w, r, "/organizations/"+org.ID.Hex(), http.StatusSeeOther)
+	http.Redirect(w, r, "/organizations/"+org.ID.Hex()+"/projects", http.StatusSeeOther)
 }
 
 func ServeOrganization(w http.ResponseWriter, r *http.Request) {
@@ -123,9 +123,100 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func ServeProjectNew(w http.ResponseWriter, r *http.Request) {
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	if !bson.IsObjectIdHex(idStr) {
+		ServeNotFound(w, r)
+		return
+	}
+	id := bson.ObjectIdHex(idStr)
+	org, err := data.GetOraganization(id)
+	catch(r, err)
+	if org == nil {
+		ServeNotFound(w, r)
+		return
+	}
+
+	if org.OwnerID != ctx.Account.ID {
+		ServeForbidden(w, r)
+		return
+	}
+
+	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
+	ServeHTMLTemplate(w, r, tplServeProjectNew, struct {
+		Context      *Context
+		Organization *data.Organization
+	}{
+		Context:      ctx,
+		Organization: org,
+	})
+}
+
+func HandleProjectCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+
+	err := r.ParseForm()
+	catch(r, err)
+
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	if !bson.IsObjectIdHex(idStr) {
+		ServeNotFound(w, r)
+		return
+	}
+	id := bson.ObjectIdHex(idStr)
+	org, err := data.GetOraganization(id)
+	catch(r, err)
+	if org == nil {
+		ServeNotFound(w, r)
+		return
+	}
+
+	if org.OwnerID != ctx.Account.ID {
+		ServeForbidden(w, r)
+		return
+	}
+
+	body := struct {
+		Name string `schema:"name"`
+	}{}
+
+	err = schema.NewDecoder().Decode(&body, r.PostForm)
+	catch(r, err)
+
+	switch {
+	case body.Name == "":
+		RedirectBack(w, r)
+		return
+	}
+
+	prj := data.Project{
+		Name:           body.Name,
+		OwnerID:        ctx.Account.ID,
+		OrganizationID: org.ID,
+	}
+	err = prj.Put()
+	catch(r, err)
+
+	http.Redirect(w, r, "/projects/"+prj.ID.Hex(), http.StatusSeeOther)
+}
+
 func init() {
 	Router.NewRoute().Methods("GET").Path("/organizations").HandlerFunc(ServeOrganizationList)
 	Router.NewRoute().Methods("GET").Path("/organizations/new").HandlerFunc(ServeOrganizationNew)
 	Router.NewRoute().Methods("POST").Path("/organizations/new").HandlerFunc(HandleOrganizationCreate)
-	Router.NewRoute().Methods("GET").Path("/organizations/{id}").HandlerFunc(ServeOrganization)
+	Router.NewRoute().Methods("GET").Path("/organizations/{id}/projects").HandlerFunc(ServeOrganization)
+	Router.NewRoute().Methods("GET").Path("/organizations/{id}/projects/new").HandlerFunc(ServeProjectNew)
+	Router.NewRoute().Methods("POST").Path("/organizations/{id}/projects/new").HandlerFunc(HandleProjectCreate)
 }
