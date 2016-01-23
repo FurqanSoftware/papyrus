@@ -60,27 +60,88 @@ func (u Ops) Compose(v Ops) (z Ops, err error) {
 			return nil, ErrTooLong
 		}
 
+		var c, p, q Op
 		switch b := b.(type) {
 		case RetainOp:
 			x, ok := a.(RetainComposer)
 			if !ok {
 				return nil, ErrBadOpPair
 			}
-			c, p, q := x.ComposeRetain(b)
-			z = append(z, c)
-			l.Next(p)
-			r.Next(q)
+			c, p, q = x.ComposeRetain(b)
 
 		case DeleteOp:
 			x, ok := a.(DeleteComposer)
 			if !ok {
 				return nil, ErrBadOpPair
 			}
-			c, p, q := x.ComposeDelete(b)
-			z = append(z, c)
-			l.Next(p)
-			r.Next(q)
+			c, p, q = x.ComposeDelete(b)
 		}
+
+		z = append(z, c)
+		l.Next(p)
+		r.Next(q)
+	}
+
+	return
+}
+
+func (u Ops) Transform(v Ops) (up, vp Ops, err error) {
+	if u.SpanBase() != v.SpanBase() {
+		return nil, nil, ErrBadSpans
+	}
+
+	l := Cursor{Ops: u}
+	r := Cursor{Ops: v}
+	for !l.Fin() || !r.Fin() {
+		a := l.Op()
+		b := r.Op()
+
+		switch {
+		case a.Type() == OpInsert:
+			up = append(up, a)
+			vp = append(vp, RetainOp(a.Span()))
+			l.Next(Noop)
+			continue
+
+		case b.Type() == OpInsert:
+			up = append(up, RetainOp(b.Span()))
+			vp = append(vp, b)
+			r.Next(Noop)
+			continue
+		}
+
+		if l.Fin() {
+			return nil, nil, ErrTooShort
+		}
+		if r.Fin() {
+			return nil, nil, ErrTooLong
+		}
+
+		var c, d, p, q Op
+		switch b := b.(type) {
+		case RetainOp:
+			x, ok := a.(RetainTransformer)
+			if !ok {
+				return nil, nil, ErrBadOpPair
+			}
+			c, d, p, q = x.TransformRetain(b)
+
+		case DeleteOp:
+			x, ok := a.(DeleteTransformer)
+			if !ok {
+				return nil, nil, ErrBadOpPair
+			}
+			c, d, p, q = x.TransformDelete(b)
+		}
+
+		if c != Noop {
+			up = append(up, c)
+		}
+		if d != Noop {
+			vp = append(vp, d)
+		}
+		l.Next(p)
+		r.Next(q)
 	}
 
 	return
