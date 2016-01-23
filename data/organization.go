@@ -27,3 +27,14 @@ func GetOraganization(id bson.ObjectId) (*Organization, error) {
 	}
 	return &org, nil
 }
+
+func (o *Organization) Put() error {
+	o.ModifiedAt = time.Now()
+
+	if o.ID == "" {
+		o.ID = bson.NewObjectId()
+		o.CreatedAt = o.ModifiedAt
+	}
+	_, err := sess.DB("").C(organizationC).UpsertId(o.ID, o)
+	return err
+}
