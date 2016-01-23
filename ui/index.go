@@ -76,6 +76,20 @@ func HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func HandleLogout(w http.ResponseWriter, r *http.Request) {
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	delete(ctx.Session.Values, "accountID")
+	ctx.Session.Save(r, w)
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func init() {
 	goth.UseProviders(
 		gplus.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), os.Getenv("BASE")+"/login/gplus/callback", "email"),
@@ -100,6 +114,10 @@ func init() {
 		Methods("GET").
 		Path("/login").
 		HandlerFunc(ServeLogin)
+	Router.NewRoute().
+		Methods("GET").
+		Path("/logout").
+		HandlerFunc(HandleLogout)
 	Router.NewRoute().
 		Methods("GET").
 		Path("/login/{provider}").
