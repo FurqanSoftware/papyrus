@@ -61,6 +61,10 @@ func (p *Project) Organization() (*Organization, error) {
 	return GetOraganization(p.OrganizationID)
 }
 
+func (p *Project) Owner() (*Account, error) {
+	return GetAccount(p.OwnerID)
+}
+
 func (p *Project) Put() error {
 	p.ModifiedAt = time.Now()
 
