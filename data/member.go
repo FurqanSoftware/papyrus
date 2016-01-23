@@ -52,6 +52,10 @@ func (m *Memeber) Inviter() (*Account, error) {
 	return GetAccount(m.InviterID)
 }
 
+func (m *Memeber) Project() (*Project, error) {
+	return GetProject(m.ProjectID)
+}
+
 func (m *Memeber) Put() error {
 	m.ModifiedAt = time.Now()
 
