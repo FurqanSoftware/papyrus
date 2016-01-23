@@ -30,6 +30,20 @@ func GetMember(id bson.ObjectId) (*Memeber, error) {
 	return &mem, nil
 }
 
+func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Memeber, error) {
+	mems := []Memeber{}
+	err := sess.DB("").C(memberC).
+		Find(bson.M{"project_id": projectID}).
+		Skip(skip).
+		Limit(limit).
+		Sort("-created_at").
+		All(mems)
+	if err != nil {
+		return nil, err
+	}
+	return mems, nil
+}
+
 func (m *Memeber) Put() error {
 	m.ModifiedAt = time.Now()
 
