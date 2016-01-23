@@ -21,4 +21,6 @@ var (
 
 	tplIndex = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/index.html"))
 	tplLogin = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/login.html"))
+
+	tplServeOrganization = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/OrganizationView.html"))
 )
