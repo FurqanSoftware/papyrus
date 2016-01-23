@@ -56,3 +56,14 @@ func (a *Account) PrimaryEmail() AccountEmail {
 	}
 	return AccountEmail{}
 }
+
+func (a *Account) Put() error {
+	a.ModifiedAt = time.Now()
+
+	if a.ID == "" {
+		a.ID = bson.NewObjectId()
+		a.CreatedAt = a.ModifiedAt
+	}
+	_, err := sess.DB("").C(accountC).UpsertId(a.ID, a)
+	return err
+}
