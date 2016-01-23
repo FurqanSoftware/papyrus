@@ -1,0 +1,30 @@
+{{define "user-nav"}}
+	<ul class="nav navbar-nav">
+		<li>
+			<a href="/organizations">Organizations</a>
+		</li>
+	</ul>
+	<ul class="nav navbar-nav navbar-right">
+		<li class="dropdown">
+			<a class="dropdown-toggle" href="#" data-toggle="dropdown">{{(.Context.Account.PrimaryEmail).Address}}
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu" role="menu">
+				<li>
+					<a href="/logout">Logout</a>
+				</li>
+			</ul>
+		</li>
+	</ul>
+{{end}}
+
+{{define "no-user-nav"}}
+	<ul class="nav navbar-nav navbar-right">
+		<li>
+			<a href="/register">Register</a>
+		</li>
+		<li>
+			<a href="/login">Login</a>
+		</li>
+	</ul>
+{{end}}
