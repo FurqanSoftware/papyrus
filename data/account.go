@@ -1,6 +1,7 @@
 package data
 
 import (
+	"math"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -46,6 +47,14 @@ func GetAccountEmail(addr string) (*Account, error) {
 		return nil, err
 	}
 	return &acc, nil
+}
+
+func (a *Account) Organizations() ([]Organization, error) {
+	orgs, err := ListOraganizationsOwner(a.ID, 0, math.MaxInt32)
+	if err != nil {
+		return nil, err
+	}
+	return orgs, nil
 }
 
 func (a *Account) PrimaryEmail() AccountEmail {
