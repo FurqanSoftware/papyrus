@@ -20,7 +20,7 @@
 				{{else}}
 					<div class="list-group">
 						{{range $org := .Organizations}}
-							<a href="/organizations/{{$org.ID.Hex}}" class="list-group-item">{{$org.Name}}</a>
+							<a href="/organizations/{{$org.ID.Hex}}/projects" class="list-group-item">{{$org.Name}}</a>
 						{{end}}
 					</div>
 				{{end}}

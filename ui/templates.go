@@ -27,4 +27,5 @@ var (
 	tplServeOrganizationNew  = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationNewForm.html"))
 
 	tplServeProjectNew = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/projectNewForm.html"))
+	tplServeProject    = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/projectView.html"))
 )

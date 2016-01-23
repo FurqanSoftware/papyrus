@@ -72,6 +72,6 @@ func (p *Project) Put() error {
 		p.ID = bson.NewObjectId()
 		p.CreatedAt = p.ModifiedAt
 	}
-	_, err := sess.DB("").C(organizationC).UpsertId(p.ID, p)
+	_, err := sess.DB("").C(projectC).UpsertId(p.ID, p)
 	return err
 }
