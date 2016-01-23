@@ -30,6 +30,18 @@ func GetMember(id bson.ObjectId) (*Member, error) {
 	return &mem, nil
 }
 
+func GetMemberProjectAccount(pID bson.ObjectId, aID bson.ObjectId) (*Member, error) {
+	mem := Member{}
+	err := sess.DB("").C(memberC).Find(bson.M{"project_id": pID, "account_id": aID}).One(&mem)
+	if err == mgo.ErrNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &mem, nil
+}
+
 func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Member, error) {
 	mems := []Member{}
 	err := sess.DB("").C(memberC).
