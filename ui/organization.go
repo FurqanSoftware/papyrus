@@ -30,11 +30,18 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if org.OwnerID != ctx.Account.ID {
+		ServeForbidden(w, r)
+		return
+	}
+
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplServeOrganization, struct {
-		Context *Context
+		Context      *Context
+		Organization *data.Organization
 	}{
-		Context: ctx,
+		Context:      ctx,
+		Organization: org,
 	})
 }
 
