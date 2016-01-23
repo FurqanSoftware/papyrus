@@ -126,8 +126,11 @@ func (p DeleteOp) TransformDelete(q DeleteOp) (Op, Op, Op, Op) {
 	case p > q:
 		return Noop, Noop, p - q, Noop
 
-	default:
+	case p < q:
 		return Noop, Noop, Noop, q - p
+
+	default:
+		return Noop, Noop, Noop, Noop
 	}
 }
 
