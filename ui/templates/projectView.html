@@ -1,10 +1,12 @@
 {{define "main"}}
 	<div class="col-md-9">
-		<div class="row">
-			<div class="col-md-2">
-				<a class="btn btn-block btn-primary" href="/projects/{{.Project.ID.Hex}}/documents/new">New document</a>
+		{{if eq .Project.OwnerID .Context.Account.ID}}
+			<div class="row">
+				<div class="col-md-2">
+					<a class="btn btn-block btn-primary" href="/projects/{{.Project.ID.Hex}}/documents/new">New document</a>
+				</div>
 			</div>
-		</div>
+		{{end}}
 		<br>
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -46,13 +48,15 @@
 						{{end}}
 					</div>
 				{{end}}
-				<form class="form-inline" method="POST" action="/projects/{{.Project.ID.Hex}}/members/add">
-					<div class="form-group">
-						<label class="sr-only" for="inpEmail">Email address</label>
-						<input type="email" class="form-control" id="inpEmail" placeholder="Email" name="email">
-					</div>
-					<button type="submit" class="btn btn-default">Add</button>
-				</form>
+				{{if eq .Project.OwnerID .Context.Account.ID}}
+					<form class="form-inline" method="POST" action="/projects/{{.Project.ID.Hex}}/members/add">
+						<div class="form-group">
+							<label class="sr-only" for="inpEmail">Email address</label>
+							<input type="email" class="form-control" id="inpEmail" placeholder="Email" name="email">
+						</div>
+						<button type="submit" class="btn btn-default">Add</button>
+					</form>
+				{{end}}
 			</div>
 		</div>
 	</div>
