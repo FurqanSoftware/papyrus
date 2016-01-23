@@ -17,3 +17,9 @@ func ServeBadRequest(w http.ResponseWriter, r *http.Request) {
 func ServeInternalServerError(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 }
+
+func catch(r *http.Request, err error) {
+	if err != nil {
+		panic(err)
+	}
+}
