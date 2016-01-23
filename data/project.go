@@ -25,7 +25,7 @@ func ListProjectsOrganization(orgID bson.ObjectId, skip, limit int) ([]Project, 
 		Skip(skip).
 		Limit(limit).
 		Sort("-created_at").
-		All(prjs)
+		All(&prjs)
 	if err != nil {
 		return nil, err
 	}
