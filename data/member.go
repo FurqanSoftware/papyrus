@@ -44,6 +44,14 @@ func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Memeber, er
 	return mems, nil
 }
 
+func (m *Memeber) Account() (*Account, error) {
+	return GetAccount(m.AccountID)
+}
+
+func (m *Memeber) Inviter() (*Account, error) {
+	return GetAccount(m.InviterID)
+}
+
 func (m *Memeber) Put() error {
 	m.ModifiedAt = time.Now()
 
