@@ -1,0 +1,30 @@
+{{define "main"}}
+	<div class="col-md-9">
+		<div class="row">
+			<div class="col-md-2">
+				<a class="btn btn-block btn-primary" href="/organizations/{{.Organization.ID.Hex}}/projects/new">New project</a>
+			</div>
+		</div>
+		<br>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel-title">
+					<h4>{{.Organization.Name}}'s projects</h4>
+				</div>
+			</div>
+			<div class="panel-body">
+				{{if eq (len .Projects) 0}}
+					<p class="text-center">
+						No projects
+					</p>
+				{{else}}
+					<div class="list-group">
+						{{range $prj := .Projects}}
+							<a href="/projects/{{$prj.ID.Hex}}" class="list-group-item">{{$prj.Name}}</a>
+						{{end}}
+					</div>
+				{{end}}
+			</div>
+		</div>
+	</div>
+{{end}}
