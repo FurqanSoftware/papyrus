@@ -14,7 +14,7 @@ func ServeOrganizationList(w http.ResponseWriter, r *http.Request) {
 	ctx := GetContext(r)
 
 	if ctx.Account == nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	acc := ctx.Account
@@ -32,11 +32,26 @@ func ServeOrganizationList(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func ServeOrganizationNew(w http.ResponseWriter, r *http.Request) {
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+
+	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
+	ServeHTMLTemplate(w, r, tplServeOrganizationNew, struct {
+		Context *Context
+	}{
+		Context: ctx,
+	})
+}
+
 func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 	ctx := GetContext(r)
 
 	if ctx.Account == nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
 	vars := mux.Vars(r)
@@ -75,5 +90,6 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	Router.NewRoute().Methods("GET").Path("/organizations").HandlerFunc(ServeOrganizationList)
+	Router.NewRoute().Methods("GET").Path("/organizations/new").HandlerFunc(ServeOrganizationNew)
 	Router.NewRoute().Methods("GET").Path("/organizations/{id}").HandlerFunc(ServeOrganization)
 }

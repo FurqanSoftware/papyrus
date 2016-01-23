@@ -24,4 +24,5 @@ var (
 
 	tplServeOrganization     = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationView.html"))
 	tplServeOrganizationList = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationList.html"))
+	tplServeOrganizationNew  = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationNewForm.html"))
 )
