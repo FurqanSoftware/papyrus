@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"math"
 	"mime"
 	"net/http"
 
@@ -35,13 +36,18 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	prjs, err := data.ListProjectsOrganization(org.ID, 0, math.MaxInt32)
+	catch(r, err)
+
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplServeOrganization, struct {
 		Context      *Context
 		Organization *data.Organization
+		Projects     []data.Project
 	}{
 		Context:      ctx,
 		Organization: org,
+		Projects:     prjs,
 	})
 }
 

@@ -8,12 +8,29 @@ import (
 )
 
 type Project struct {
-	ID         bson.ObjectId   `bson:"_id"`
-	Name       string          `bson:"name"`
-	OwnerID    bson.ObjectId   `bson:"owner_id"`
-	MemberIDs  []bson.ObjectId `bson:"member_ids"`
-	CreatedAt  time.Time       `bson:"created_at"`
-	ModifiedAt time.Time       `bson:"modified_at"`
+	ID             bson.ObjectId   `bson:"_id"`
+	Name           string          `bson:"name"`
+	OwnerID        bson.ObjectId   `bson:"owner_id"`
+	OrganizationID bson.ObjectId   `bson:"organization_id"`
+	MemberIDs      []bson.ObjectId `bson:"member_ids"`
+	CreatedAt      time.Time       `bson:"created_at"`
+	ModifiedAt     time.Time       `bson:"modified_at"`
+}
+
+func ListProjectsOrganization(orgID bson.ObjectId, skip, limit int) ([]Project, error) {
+	prjs := []Project{}
+
+	err := sess.DB("").C(projectC).
+		Find(bson.M{"organization_id": orgID}).
+		Skip(skip).
+		Limit(limit).
+		Sort("-created_at").
+		All(prjs)
+	if err != nil {
+		return nil, err
+	}
+
+	return prjs, nil
 }
 
 func GetProject(id bson.ObjectId) (*Project, error) {
