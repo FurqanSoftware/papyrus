@@ -47,3 +47,12 @@ func GetAccountEmail(addr string) (*Account, error) {
 	}
 	return &acc, nil
 }
+
+func (a *Account) PrimaryEmail() AccountEmail {
+	for _, email := range a.Emails {
+		if email.Primary {
+			return email
+		}
+	}
+	return AccountEmail{}
+}
