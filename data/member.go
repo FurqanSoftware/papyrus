@@ -7,7 +7,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type Memeber struct {
+type Member struct {
 	ID        bson.ObjectId `bson:"_id"`
 	ProjectID bson.ObjectId `bson:"project_id"`
 	AccountID bson.ObjectId `bson:"account_id"`
@@ -18,8 +18,8 @@ type Memeber struct {
 	CreatedAt  time.Time `bson:"created_at"`
 }
 
-func GetMember(id bson.ObjectId) (*Memeber, error) {
-	mem := Memeber{}
+func GetMember(id bson.ObjectId) (*Member, error) {
+	mem := Member{}
 	err := sess.DB("").C(memberC).FindId(id).One(&mem)
 	if err == mgo.ErrNotFound {
 		return nil, nil
@@ -30,8 +30,8 @@ func GetMember(id bson.ObjectId) (*Memeber, error) {
 	return &mem, nil
 }
 
-func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Memeber, error) {
-	mems := []Memeber{}
+func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Member, error) {
+	mems := []Member{}
 	err := sess.DB("").C(memberC).
 		Find(bson.M{"project_id": projectID}).
 		Skip(skip).
@@ -44,19 +44,19 @@ func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Memeber, er
 	return mems, nil
 }
 
-func (m *Memeber) Account() (*Account, error) {
+func (m *Member) Account() (*Account, error) {
 	return GetAccount(m.AccountID)
 }
 
-func (m *Memeber) Inviter() (*Account, error) {
+func (m *Member) Inviter() (*Account, error) {
 	return GetAccount(m.InviterID)
 }
 
-func (m *Memeber) Project() (*Project, error) {
+func (m *Member) Project() (*Project, error) {
 	return GetProject(m.ProjectID)
 }
 
-func (m *Memeber) Put() error {
+func (m *Member) Put() error {
 	m.ModifiedAt = time.Now()
 
 	if m.ID == "" {

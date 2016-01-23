@@ -210,13 +210,17 @@ func HandleProjectCreate(w http.ResponseWriter, r *http.Request) {
 	err = prj.Put()
 	catch(r, err)
 
-	mem := data.Memeber{
+	mem := data.Member{
 		ProjectID: prj.ID,
 		AccountID: prj.OwnerID,
 		InviterID: prj.OwnerID,
 		InvitedAt: time.Now(),
 	}
 	err = mem.Put()
+	catch(r, err)
+
+	prj.MemberIDs = append(prj.MemberIDs, mem.ID)
+	err = prj.Put()
 	catch(r, err)
 
 	http.Redirect(w, r, "/projects/"+prj.ID.Hex(), http.StatusSeeOther)
