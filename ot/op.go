@@ -3,8 +3,7 @@ package ot
 type OpType int
 
 const (
-	OpNoop OpType = iota
-	OpRetain
+	OpRetain OpType = iota
 	OpInsert
 	OpDelete
 )
