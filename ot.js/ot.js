@@ -221,6 +221,85 @@ function opsCompose(u, v) {
 	return z
 }
 
+function opsTransform(u, v) {
+	if(opsSpanBase(u) != opsSpanBase(v)) {
+		throw errBadSpans
+	}
+
+	var up = []
+	var vp = []
+
+	var l = new Cursor(u)
+	var r = new Cursor(v)
+	while(!l.fin() || !r.fin()) {
+		var a = l.op()
+		var b = r.op()
+
+		switch(true) {
+		case opType(a) === 'insert':
+			up.push(a)
+			vp.push(opSpan(a))
+			l.next(noop)
+			continue
+
+		case opType(b) === 'insert':
+			up.push(opSpan(b))
+			vp.push(b)
+			r.next(noop)
+			continue
+		}
+
+		if(l.fin()) {
+			throw errTooShort
+		}
+		if(r.fin()) {
+			throw errTooLong
+		}
+
+		var c, d, p, q
+		switch(opType(b)) {
+		case 'retain':
+			var e
+			switch(opType(a)) {
+			case 'retain':
+				 e = opTransformRetainRetain(a, b)
+				 break
+
+			case 'delete':
+				 e = opTransformDeleteRetain(a, b)
+				 break
+			}
+			c = e[0], d = e[1], p = e[2], q = e[3]
+			break
+
+		case 'delete':
+			var e
+			switch(opType(a)) {
+			case 'retain':
+				 e = opTransformRetainDelete(a, b)
+				 break
+
+			case 'delete':
+				 e = opTransformDeleteDelete(a, b)
+				 break
+			}
+			c = e[0], d = e[1], p = e[2], q = e[3]
+			break
+		}
+
+		if(c != noop) {
+			up.push(c)
+		}
+		if(d != noop) {
+			vp.push(d)
+		}
+		l.next(p)
+		r.next(q)
+	}
+
+	return [up, vp]
+}
+
 function Cursor(ops) {
 	this.ops = ops
 	this.nxt = null
@@ -261,6 +340,7 @@ try {
 		opTransformDeleteDelete: opTransformDeleteDelete,
 		opsSpanBase: opsSpanBase,
 		opsSpanTarget: opsSpanTarget,
-		opsCompose: opsCompose
+		opsCompose: opsCompose,
+		opsTransform: opsTransform
 	}
 } catch(e) {}
