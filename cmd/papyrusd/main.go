@@ -15,6 +15,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = data.MakeIndexes()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	http.Handle("/", ui.NewServer())
 
 	log.Printf("Ligtening on %s", os.Getenv("ADDR"))
