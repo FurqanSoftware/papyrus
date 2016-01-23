@@ -14,7 +14,7 @@ type Ops []Op
 func (u Ops) SpanBase() int {
 	l := 0
 	for _, o := range u {
-		if o.Type() == OpInsert || o.Type() == OpDelete {
+		if o.Type() == OpInsert {
 			continue
 		}
 		l += o.Span()
@@ -25,7 +25,11 @@ func (u Ops) SpanBase() int {
 func (u Ops) SpanTarget() int {
 	l := 0
 	for _, o := range u {
-		l += o.Span()
+		if o.Type() == OpDelete {
+			l -= o.Span()
+		} else {
+			l += o.Span()
+		}
 	}
 	return l
 }
