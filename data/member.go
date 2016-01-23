@@ -29,3 +29,14 @@ func GetMember(id bson.ObjectId) (*Memeber, error) {
 	}
 	return &mem, nil
 }
+
+func (m *Memeber) Put() error {
+	m.ModifiedAt = time.Now()
+
+	if m.ID == "" {
+		m.ID = bson.NewObjectId()
+		m.CreatedAt = m.ModifiedAt
+	}
+	_, err := sess.DB("").C(memberC).UpsertId(m.ID, m)
+	return err
+}
