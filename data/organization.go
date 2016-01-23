@@ -28,6 +28,20 @@ func GetOraganization(id bson.ObjectId) (*Organization, error) {
 	return &org, nil
 }
 
+func ListOraganizationsOwner(ownerID bson.ObjectId, skip, limit int) ([]Organization, error) {
+	orgs := []Organization{}
+	err := sess.DB("").C(organizationC).
+		Find(bson.M{"owner_id": ownerID}).
+		Skip(skip).
+		Limit(limit).
+		Sort("-created_at").
+		All(&orgs)
+	if err != nil {
+		return nil, err
+	}
+	return orgs, nil
+}
+
 func (o *Organization) Put() error {
 	o.ModifiedAt = time.Now()
 
