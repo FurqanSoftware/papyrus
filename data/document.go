@@ -39,7 +39,7 @@ func ListDocuments(id bson.ObjectId, skip, limit int) ([]Document, error) {
 		Skip(skip).
 		Limit(limit).
 		Sort("-created_at").
-		All(docs)
+		All(&docs)
 	if err != nil {
 		return nil, err
 	}

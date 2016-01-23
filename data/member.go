@@ -37,7 +37,7 @@ func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Memeber, er
 		Skip(skip).
 		Limit(limit).
 		Sort("-created_at").
-		All(mems)
+		All(&mems)
 	if err != nil {
 		return nil, err
 	}
