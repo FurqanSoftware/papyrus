@@ -98,6 +98,46 @@ func HandleDocumentCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/projects/"+prj.ID.Hex(), http.StatusSeeOther)
 }
 
+func ServeDocument(w http.ResponseWriter, r *http.Request) {
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	acc := ctx.Account
+
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	if !bson.IsObjectIdHex(idStr) {
+		ServeNotFound(w, r)
+		return
+	}
+	id := bson.ObjectIdHex(idStr)
+	doc, err := data.GetDocument(id)
+	catch(r, err)
+	if doc == nil {
+		ServeNotFound(w, r)
+		return
+	}
+
+	mem, err := data.GetMemberProjectAccount(doc.ProjectID, acc.ID)
+	catch(r, err)
+	if mem == nil {
+		ServeForbidden(w, r)
+		return
+	}
+
+	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
+	ServeHTMLTemplate(w, r, tplServeDocument, struct {
+		Context  *Context
+		Document *data.Document
+	}{
+		Context:  ctx,
+		Document: doc,
+	})
+}
+
 func init() {
 	Router.NewRoute().
 		Methods("GET").
@@ -107,4 +147,8 @@ func init() {
 		Methods("POST").
 		Path("/projects/{id}/documents/new").
 		HandlerFunc(HandleDocumentCreate)
+	Router.NewRoute().
+		Methods("GET").
+		Path("/documents/{id}").
+		HandlerFunc(ServeDocument)
 }

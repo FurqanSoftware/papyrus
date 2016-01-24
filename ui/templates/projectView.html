@@ -1,3 +1,4 @@
+{{define "styles"}}{{end}}
 {{define "main"}}
 	<div class="col-md-9">
 		{{if eq .Project.OwnerID .Context.Account.ID}}
@@ -22,7 +23,7 @@
 				{{else}}
 					<div class="list-group">
 						{{range $doc := .Documents}}
-							<a href="/projects/{{$doc.ID.Hex}}" class="list-group-item">{{$doc.Title}}</a>
+							<a href="/documents/{{$doc.ID.Hex}}" class="list-group-item">{{$doc.Title}}</a>
 						{{end}}
 					</div>
 				{{end}}
@@ -61,3 +62,4 @@
 		</div>
 	</div>
 {{end}}
+{{define "scripts"}}{{end}}
