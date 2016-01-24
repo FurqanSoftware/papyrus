@@ -20,7 +20,7 @@ function codemirrorChangeToOps(doc, docLen, ch) {
 	})
 }
 
-var editor = CodeMirror.fromTextArea($('#editor')[0], {
+var editor = CodeMirror.fromTextArea($('#editor').val('')[0], {
 	lineNumbers: true
 })
 var opsBuf = null
