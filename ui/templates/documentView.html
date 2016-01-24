@@ -1,0 +1,79 @@
+{{define "styles"}}
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/codemirror.min.css">
+{{end}}
+
+{{define "main"}}
+	<div class="col-md-6">
+		{{if .Document.ShortID}}
+			<div class="row">
+				<pre>
+					{{.Document.ShortID}}
+				</pre>
+			</div>
+		{{else if eq .Project.OwnerID .Context.Account.ID}}
+			<div class="row">
+				<div class="col-md-2">
+					<a class="btn btn-block btn-primary" href="/documents/{{.Document.ID.Hex}}/publish" data-method="POST">Publish</a>
+				</div>
+			</div>
+			<hr>
+		{{end}}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel-title">
+					<h4>{{.Document.Title}} editor</h4>
+				</div>
+			</div>
+			<div class="panel-body">
+				<form>
+					<textarea id="editor">{{.Document.Content}}</textarea>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel-title">
+					<h4>{{.Document.Title}} view</h4>
+				</div>
+			</div>
+			<div id="preview" class="panel-body">
+			</div>
+		</div>
+	</div>
+{{end}}
+
+{{define "scripts"}}
+	<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/codemirror.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/showdown/1.3.0/showdown.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js"></script>
+	<script>
+		var token = "{{.Token}}"
+		$(function(){
+
+			$('a[href][data-method]').on('click', function(event) {
+				event.preventDefault()
+				var $form = $('<form></form>').attr({
+					method: $(this).data('method'),
+					action: $(this).attr('href')
+				})
+				$('body').append($form)
+				$form[0].submit()
+			})
+
+			var $editorArea = $("#editor")
+			var $previewDiv = $("#preview")
+			var converter = new showdown.Converter()
+			var editor = CodeMirror.fromTextArea($editorArea[0], {
+				lineNumbers: true
+			});
+
+			editor.on("change", _.throttle(updatePreview, 500))
+
+			function updatePreview(){
+				$previewDiv.html(converter.makeHtml(editor.getValue()))
+			}
+		})
+	</script>
+{{end}}

@@ -1,0 +1,31 @@
+{{define "styles"}}{{end}}
+{{define "main"}}
+	<div class="col-md-9">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel-title">
+					<h4>New Document</h4>
+				</div>
+			</div>
+			<div class="panel-body">
+				<form method="POST">
+					<div class="row">
+						<div class="col-md-2 text-right">
+							<label for="inpName">Title</label>
+						</div>
+						<div class="col-md-4">
+							<input id="inpName" class="form-control" type="text" name="title" placeholder="Name">
+						</div>
+					</div>
+					<br>
+					<div class="row">
+						<div class="col-md-offset-2 col-md-2">
+							<button type="submit" class="btn btn-default">Create</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{{end}}
+{{define "scripts"}}{{end}}
