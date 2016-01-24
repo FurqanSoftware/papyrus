@@ -34,6 +34,18 @@ func GetDocument(id bson.ObjectId) (*Document, error) {
 	return &doc, nil
 }
 
+func GetDocumentShortID(shortID string) (*Document, error) {
+	doc := Document{}
+	err := sess.DB("").C(documentC).Find(bson.M{"short_id": shortID}).One(&doc)
+	if err == mgo.ErrNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &doc, nil
+}
+
 const shortIDAlpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 func GenerateShortID() (string, error) {

@@ -90,6 +90,30 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func ServeDocumentPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	if idStr == "" {
+		ServeNotFound(w, r)
+		return
+	}
+
+	doc, err := data.GetDocumentShortID(idStr)
+	catch(r, err)
+
+	if doc == nil {
+		ServeNotFound(w, r)
+		return
+	}
+
+	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
+	ServeHTMLTemplate(w, r, tplServeDocumentPage, struct {
+		Document *data.Document
+	}{
+		Document: doc,
+	})
+}
+
 func init() {
 	goth.UseProviders(
 		gplus.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), os.Getenv("BASE")+"/login/gplus/callback", "email"),
@@ -126,5 +150,9 @@ func init() {
 		Methods("GET").
 		Path("/login/{provider}/callback").
 		HandlerFunc(HandleAuthCallback)
+	Router.NewRoute().
+		Methods("GET").
+		Path("/d/{id}").
+		HandlerFunc(ServeDocumentPage)
 
 }

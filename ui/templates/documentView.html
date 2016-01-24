@@ -5,11 +5,7 @@
 {{define "main"}}
 	<div class="col-md-6">
 		{{if .Document.ShortID}}
-			<div class="row">
-				<pre>
-					{{.Document.ShortID}}
-				</pre>
-			</div>
+			<a href="/d/{{.Document.ShortID}}" target="_blank">Share link</a>
 		{{else if eq .Project.OwnerID .Context.Account.ID}}
 			<div class="row">
 				<div class="col-md-2">
