@@ -4,16 +4,22 @@
 
 {{define "main"}}
 	<div class="col-md-12">
-		{{if .Document.ShortID}}
-			<a href="/d/{{.Document.ShortID}}" target="_blank">Share link</a>
-		{{else if eq .Project.OwnerID .Context.Account.ID}}
-			<div class="row">
-				<div class="col-md-2">
-					<a class="btn btn-block btn-primary" href="/documents/{{.Document.ID.Hex}}/publish" data-method="POST">Publish</a>
-				</div>
-			</div>
-			<hr>
-		{{end}}
+		<div class="btn-toolbar">
+				{{if eq .Project.OwnerID .Context.Account.ID}}
+					<div class="btn-group">
+						{{if .Document.Published}}
+							<a class="btn btn-primary" href="/documents/{{.Document.ID.Hex}}/unpublish" data-method="POST">Unpublish</a>
+							<a class="btn btn-link" href="/d/{{.Document.ShortID}}" target="_blank">Public Link <i class="fa fa-external-link"></i></a>
+						{{else}}
+							<a class="btn btn-primary" href="/documents/{{.Document.ID.Hex}}/publish" data-method="POST">Publish</a>
+						{{end}}
+					</div>
+					<!-- <div class="btn-group pull-right">
+						<a class="btn btn-danger" href="/documents/{{.Document.ID.Hex}}/delete" data-method="POST">Delete</a>
+					</div> -->
+				{{end}}
+		</div>
+		<br>
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				{{.Document.Title}}
