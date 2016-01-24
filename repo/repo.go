@@ -56,10 +56,13 @@ func (r *Repo) loop() {
 	for {
 		select {
 		case doc := <-r.syncCh:
+			_, ok := r.docs[doc.ID]
 			r.docs[doc.ID] = doc
-			go func() {
-				r.nextCh <- doc.ID
-			}()
+			if !ok {
+				go func() {
+					r.nextCh <- doc.ID
+				}()
+			}
 
 		case id := <-r.nextCh:
 			doc := r.docs[id]
