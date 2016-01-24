@@ -1,63 +1,71 @@
 {{define "styles"}}{{end}}
 {{define "main"}}
-	<div class="col-md-9">
-		{{if eq .Project.OwnerID .Context.Account.ID}}
-			<div class="row">
-				<div class="col-md-2">
-					<a class="btn btn-block btn-primary" href="/projects/{{.Project.ID.Hex}}/documents/new">New document</a>
-				</div>
-			</div>
-		{{end}}
-		<br>
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="panel-title">
-					<h4>{{.Project.Name}}'s documents</h4>
-				</div>
-			</div>
-			<div class="panel-body">
-				{{if eq (len .Documents) 0}}
-					<p class="text-center">
-						No document is created
-					</p>
-				{{else}}
-					<div class="list-group">
-						{{range $doc := .Documents}}
-							<a href="/documents/{{$doc.ID.Hex}}" class="list-group-item">{{$doc.Title}}</a>
-						{{end}}
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-9">
+				{{if eq .Project.OwnerID .Context.Account.ID}}
+					<div class="btn-toolbar">
+						<div class="btn-group">
+							<a class="btn btn-block btn-primary" href="/projects/{{.Project.ID.Hex}}/documents/new">New Document</a>
+						</div>
 					</div>
 				{{end}}
 			</div>
 		</div>
-	</div>
-	<div class="col-md-3">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="panel-title">
-					<h4>{{.Project.Name}}'s members</h4>
+		<br>
+		<div class="row">
+			<div class="col-md-9">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<div class="panel-title">
+							<h4>{{.Project.Name}}'s Documents</h4>
+						</div>
+					</div>
+						{{if eq (len .Documents) 0}}
+							<div class="panel-body">
+								<p class="text-center">
+									There are no documents under this project.
+								</p>
+							</div>
+						{{else}}
+							<div class="list-group">
+								{{range $doc := .Documents}}
+									<a href="/documents/{{$doc.ID.Hex}}" class="list-group-item">{{$doc.Title}}</a>
+								{{end}}
+							</div>
+						{{end}}
 				</div>
 			</div>
-			<div class="panel-body">
-				{{if eq (len .Members) 0}}
-					<p class="text-center">
-						No member is added
-					</p>
-				{{else}}
-					<div class="list-group">
-						{{range $mem := .Members}}
-							<li class="list-group-item">{{(($mem.Account).PrimaryEmail).Address}}</li>
+			<div class="col-md-3">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<div class="panel-title">
+							<h4>{{.Project.Name}}'s members</h4>
+						</div>
+					</div>
+					<div class="panel-body">
+						{{if eq (len .Members) 0}}
+							<p class="text-center">
+								No member is added
+							</p>
+						{{else}}
+							<div class="list-group">
+								{{range $mem := .Members}}
+									<li class="list-group-item">{{(($mem.Account).PrimaryEmail).Address}}</li>
+								{{end}}
+							</div>
+						{{end}}
+						{{if eq .Project.OwnerID .Context.Account.ID}}
+							<form class="form-inline" method="POST" action="/projects/{{.Project.ID.Hex}}/members/add">
+								<div class="form-group">
+									<label class="sr-only" for="inpEmail">Email address</label>
+									<input type="email" class="form-control" id="inpEmail" placeholder="Email" name="email">
+								</div>
+								<button type="submit" class="btn btn-default">Add</button>
+							</form>
 						{{end}}
 					</div>
-				{{end}}
-				{{if eq .Project.OwnerID .Context.Account.ID}}
-					<form class="form-inline" method="POST" action="/projects/{{.Project.ID.Hex}}/members/add">
-						<div class="form-group">
-							<label class="sr-only" for="inpEmail">Email address</label>
-							<input type="email" class="form-control" id="inpEmail" placeholder="Email" name="email">
-						</div>
-						<button type="submit" class="btn btn-default">Add</button>
-					</form>
-				{{end}}
+				</div>
 			</div>
 		</div>
 	</div>

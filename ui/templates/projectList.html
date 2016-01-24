@@ -2,24 +2,23 @@
 {{define "main"}}
 	<div class="col-md-9">
 		{{if eq .Organization.OwnerID .Context.Account.ID}}
-			<div class="row">
-				<div class="col-md-2">
-					<a class="btn btn-block btn-primary" href="/organizations/{{.Organization.ID.Hex}}/projects/new">New project</a>
+			<div class="btn-toolbar">
+				<div class="btn-group">
+					<a class="btn btn-block btn-primary" href="/organizations/{{.Organization.ID.Hex}}/projects/new">New Project</a>
 				</div>
 			</div>
 		{{end}}
 		<br>
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<div class="panel-title">
-					<h4>{{.Organization.Name}}'s projects</h4>
-				</div>
+				<h4>{{.Organization.Name}}'s Projects</h4>
 			</div>
-			<div class="panel-body">
 				{{if eq (len .Projects) 0}}
-					<p class="text-center">
-						No projects
-					</p>
+					<div class="panel-body">
+						<p class="text-center">
+							You do not have any project under this organization
+						</p>
+					</div>
 				{{else}}
 					<div class="list-group">
 						{{range $prj := .Projects}}
@@ -27,7 +26,6 @@
 						{{end}}
 					</div>
 				{{end}}
-			</div>
 		</div>
 	</div>
 {{end}}
