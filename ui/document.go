@@ -120,7 +120,7 @@ func ServeDocument(w http.ResponseWriter, r *http.Request) {
 	id := bson.ObjectIdHex(idStr)
 	doc, err := data.GetDocument(id)
 	catch(r, err)
-	if doc == nil {
+	if doc == nil || doc.Deleted {
 		ServeNotFound(w, r)
 		return
 	}
@@ -282,13 +282,10 @@ func HandleDocumentDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if doc.Published {
-		http.Redirect(w, r, "/documents/"+doc.ID.Hex(), http.StatusSeeOther)
-		return
-	}
-
 	doc.Deleted = true
 	doc.DeletedAt = time.Now()
+	doc.Published = false
+	doc.PublishedAt = time.Time{}
 	err = doc.Put()
 	catch(r, err)
 
