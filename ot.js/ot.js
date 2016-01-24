@@ -1,5 +1,6 @@
 var errBadType = new Error('ot.js: invalid operation type')
-var errBadSpans = new Error('ot.js: base span doesn\'t match target span')
+var errBadSpanBaseTarget = new Error('ot.js: base span doesn\'t match target span')
+var errBadSpanBase = new Error('ot.js: base spans do not match')
 var errTooShort = new Error('ot.js: operations are too short')
 var errTooLong = new Error('ot.js: operations are too long')
 var errBadOpPair = new Error('ot.js: invalid pair of operations')
@@ -168,7 +169,7 @@ function opsCompact(u) {
 
 function opsCompose(u, v) {
 	if(opsSpanTarget(u) != opsSpanBase(v)) {
-		throw errBadSpans
+		throw errBadSpanBaseTarget
 	}
 
 	var z = []
@@ -239,7 +240,7 @@ function opsCompose(u, v) {
 
 function opsTransform(u, v) {
 	if(opsSpanBase(u) != opsSpanBase(v)) {
-		throw errBadSpans
+		throw errBadSpanBase
 	}
 
 	var up = []

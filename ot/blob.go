@@ -3,6 +3,7 @@ package ot
 import (
 	"bytes"
 	"errors"
+	"fmt"
 )
 
 var (
@@ -13,6 +14,7 @@ type Blob []byte
 
 func (b *Blob) Apply(u Ops) error {
 	if u.SpanBase() != len(*b) {
+		fmt.Printf("%#v %q\n", u, *b)
 		return ErrBadSpan
 	}
 

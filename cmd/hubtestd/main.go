@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/desertbit/glue"
@@ -25,6 +26,12 @@ func main() {
 	gs := glue.NewServer()
 	gs.OnNewSocket(hub.HandleSocket)
 	http.Handle("/glue/", gs)
+
+	http.HandleFunc("/debug", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		doc, _ := hub.DefaultRepository.Get("1")
+		json.NewEncoder(w).Encode(doc)
+	})
 
 	err := http.ListenAndServe(":8080", nil)
 	catch(err)

@@ -22,6 +22,14 @@
 				return doc.indexFromPos({ line: doc.lastLine(), ch: 0 }) + doc.getLine(doc.lastLine()).length
 			}
 
+			function codemirrorTextLen(text) {
+				return text.reduce(function(m, v) { return m+v.length+1 }, -1)
+			}
+
+			function codemirrorChangeLen(ch) {
+				return codemirrorTextLen(ch.text) - codemirrorTextLen(ch.removed)
+			}
+
 			function opsTransformIndex(ops, i) {
 				var ip = i
 				var ls = 0
@@ -48,11 +56,11 @@
 				return ip
 			}
 
-			function changeToOps(doc, ch) {
+			function changeToOps(doc, docLen, ch) {
 				var rl = doc.indexFromPos(ch.from)
-				var d = -ch.removed.reduce(function(m, v) { return m+v.length+1 }, -1)
+				var d = -codemirrorTextLen(ch.removed)
 				var i = ch.text.join('\n')
-				var rr = codemirrorDocLength(doc) - rl - i.length
+				var rr = docLen - rl - codemirrorTextLen(ch.text)
 				return [rl, d, i, rr].filter(function(v) {
 					return !!v
 				})
@@ -63,17 +71,34 @@
 			var opsWait = null
 			var opsWaitID = ""
 			var opsRoot = 0
+			var skipChange = false
 			mirror.on('changes', function(event, changes) {
-				changes.forEach(function(ch) {
+				if(skipChange) {
+					skipChange = false
+					return
+				}
+				console.log('input', changes)
+				var opsTmp = null
+				var docLen = codemirrorDocLength(event.doc)
+				changes.slice().reverse().forEach(function(ch) {
+					console.log('input -', ch)
 					if(ch.origin === 'setValue') {
 						return
 					}
-					if(opsBuf === null) {
-						opsBuf = changeToOps(event.doc, ch)
+					if(opsTmp === null) {
+						opsTmp = changeToOps(event.doc, docLen, ch)
 					} else {
-						opsBuf = opsCompose(opsBuf, changeToOps(event.doc, ch))
+						opsTmp = opsCompose(changeToOps(event.doc, docLen, ch), opsTmp)
 					}
+					docLen -= codemirrorChangeLen(ch)
 				})
+				if(opsBuf === null) {
+					opsBuf = opsTmp
+				} else {
+					opsBuf = opsCompose(opsBuf, opsTmp)
+				}
+				console.log('buffer', opsBuf)
+				sync()
 			})
 
 			var socket = glue()
@@ -83,29 +108,58 @@
 				switch(fields[0]) {
 				case 'change':
 					var data = JSON.parse(fields[1])
+
+					opsRoot = data.root
+
 					if(data.id === "") {
-						console.log('initial', data.ops)
+						console.log('initial', data.ops, data.root)
 						mirror.getDoc().setValue(blobApply(mirror.getDoc().getValue(), data.ops))
 
 					} else if(data.id === opsWaitID) {
-						console.log('acknowledgement', data.ops)
+						console.log('acknowledgement', data.ops, data.root)
 						opsWait = null
+						sync()
 
 					} else {
-						console.log('external', data.ops)
+						console.log('external', data.ops, data.root)
 
+						var ops = data.ops
+						if(opsWait !== null) {
+							var e = opsTransform(opsWait, ops)
+							opsWait = e[0]
+							ops = e[1]
+						}
 						if(opsBuf !== null) {
-							var e = opsTransform(opsBuf, data.ops)
+							var e = opsTransform(opsBuf, ops)
 							opsBuf = e[0]
-							data.ops = e[1]
+							ops = e[1]
 						}
 
 						var doc = mirror.getDoc()
-						var selection = [doc.indexFromPos(doc.getCursor('anchor')), doc.indexFromPos(doc.getCursor('head'))]
-						doc.setValue(blobApply(doc.getValue(), data.ops))
-						doc.setSelection(doc.posFromIndex(opsTransformIndex(data.ops, selection[0])), doc.posFromIndex(opsTransformIndex(data.ops, selection[1])))
+						// var selection = [doc.indexFromPos(doc.getCursor('anchor')), doc.indexFromPos(doc.getCursor('head'))]
+						// doc.setValue(blobApply(doc.getValue(), ops))
+						// doc.setSelection(doc.posFromIndex(opsTransformIndex(ops, selection[0])), doc.posFromIndex(opsTransformIndex(ops, selection[1])))
+						skipChange = true
+						mirror.operation(function() {
+							var i = 0
+							ops.forEach(function(o) {
+								switch(opType(o)) {
+								case 'retain':
+									i += o
+									break
+
+								case 'insert':
+									mirror.replaceRange(o, mirror.posFromIndex(i))
+									i += o.length
+									break
+
+								case 'delete':
+									mirror.replaceRange('', mirror.posFromIndex(i), mirror.posFromIndex(i + (-o)))
+									break
+								}
+							})
+						})
 					}
-					opsRoot = data.root
 					break
 
 				case 'subscribed':
@@ -114,24 +168,20 @@
 				}
 			})
 
-			var ready = false
 			function sync() {
-				if(opsBuf === null || opsBuf.length === 0 || opsWait !== null) {
-					setTimeout(function() {
-						sync()
-					}, window.SYNC_DELAY)
+				if(opsWait !== null || opsBuf === null) {
 					return
 				}
 
 				opsWait = opsBuf
 				opsBuf = null
 				opsWaitID = new Date().getTime()+'-'+Math.round(1e9*Math.random())
+				console.log('change ', opsWait, opsRoot)
 				socket.send('change '+JSON.stringify({
 					id: opsWaitID,
 					root: opsRoot,
 					ops: opsWait
 				}))
-				sync()
 			}
 			sync()
 		</script>

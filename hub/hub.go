@@ -2,6 +2,7 @@ package hub
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strings"
 
@@ -82,6 +83,11 @@ func HandleSocket(sock *glue.Socket) {
 			ch, err = doc.Apply(ch)
 			if err != nil {
 				log.Print(err)
+
+				fmt.Printf("%#v\n", doc.History)
+				fmt.Printf("%#v\n", data)
+				fmt.Printf("%#v\n", ch)
+
 				sock.Write("error \"internal server error\"")
 				return
 			}

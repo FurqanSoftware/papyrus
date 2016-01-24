@@ -2,6 +2,7 @@ package hub
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/gophergala2016/papyrus/ot"
 )
@@ -12,9 +13,14 @@ type Document struct {
 	ID      string
 	Blob    ot.Blob
 	History []Change
+
+	mutex sync.Mutex
 }
 
 func (d *Document) Apply(ch Change) (Change, error) {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
 	if ch.Root < 0 || ch.Root > len(d.History) {
 		return Change{}, ErrBadChange
 	}
@@ -30,12 +36,14 @@ func (d *Document) Apply(ch Change) (Change, error) {
 	if err != nil {
 		return Change{}, err
 	}
-	d.History = append(d.History, ch)
-	ch = Change{
+	d.History = append(d.History, Change{
+		Root: ch.Root,
+		Ops:  ops,
+	})
+	return Change{
 		Root: len(d.History),
 		Ops:  ops,
-	}
-	return ch, nil
+	}, nil
 }
 
 type Change struct {

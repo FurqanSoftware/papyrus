@@ -1,10 +1,14 @@
 package hub
 
+import "sync"
+
 type Repository struct {
 	Documents map[string]*Document
 
 	GetBlob func(string) ([]byte, error)
 	PutBlob func(string, []byte) error
+
+	mutex sync.Mutex
 }
 
 func NewRepository() *Repository {
@@ -14,6 +18,9 @@ func NewRepository() *Repository {
 }
 
 func (r *Repository) Get(id string) (*Document, error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
 	doc, ok := r.Documents[id]
 	if !ok {
 		blob, err := r.GetBlob(id)

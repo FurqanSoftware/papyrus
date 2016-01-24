@@ -1,10 +1,16 @@
 package hub
 
-import "github.com/desertbit/glue"
+import (
+	"sync"
+
+	"github.com/desertbit/glue"
+)
 
 type Registry struct {
 	socks map[string]map[*glue.Socket]bool
 	rooms map[*glue.Socket]map[string]bool
+
+	mutex sync.RWMutex
 }
 
 func NewRegistry() *Registry {
@@ -15,6 +21,9 @@ func NewRegistry() *Registry {
 }
 
 func (r *Registry) register(sock *glue.Socket, room string) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
 	if r.socks[room] == nil {
 		r.socks[room] = map[*glue.Socket]bool{}
 	}
@@ -27,6 +36,9 @@ func (r *Registry) register(sock *glue.Socket, room string) {
 }
 
 func (r *Registry) deregister(sock *glue.Socket, room string) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
 	_, ok := r.socks[room]
 	if !ok {
 		return
@@ -48,6 +60,9 @@ func (r *Registry) deregister(sock *glue.Socket, room string) {
 }
 
 func (r *Registry) deregisterAll(sock *glue.Socket) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
 	_, ok := r.rooms[sock]
 	if !ok {
 		return
@@ -63,6 +78,9 @@ func (r *Registry) deregisterAll(sock *glue.Socket) {
 }
 
 func (r *Registry) deliver(room string, data string) {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
 	for sock := range r.socks[room] {
 		sock.Write(data)
 	}
