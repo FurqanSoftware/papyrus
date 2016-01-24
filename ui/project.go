@@ -120,10 +120,11 @@ func HandleMemberAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	nM := data.Member{
-		AccountID: acc.ID,
-		ProjectID: prj.ID,
-		InviterID: ctx.Account.ID,
-		InvitedAt: time.Now(),
+		OrganizationID: prj.OrganizationID,
+		ProjectID:      prj.ID,
+		AccountID:      acc.ID,
+		InviterID:      ctx.Account.ID,
+		InvitedAt:      time.Now(),
 	}
 	err = nM.Put()
 	catch(r, err)

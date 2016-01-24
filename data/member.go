@@ -8,11 +8,12 @@ import (
 )
 
 type Member struct {
-	ID        bson.ObjectId `bson:"_id"`
-	ProjectID bson.ObjectId `bson:"project_id"`
-	AccountID bson.ObjectId `bson:"account_id"`
-	InviterID bson.ObjectId `bson:"inviter_id"`
-	InvitedAt time.Time     `bson:"invited_at"`
+	ID             bson.ObjectId `bson:"_id"`
+	ProjectID      bson.ObjectId `bson:"project_id"`
+	OrganizationID bson.ObjectId `bson:"organization_id"`
+	AccountID      bson.ObjectId `bson:"account_id"`
+	InviterID      bson.ObjectId `bson:"inviter_id"`
+	InvitedAt      time.Time     `bson:"invited_at"`
 
 	ModifiedAt time.Time `bson:"modified_at"`
 	CreatedAt  time.Time `bson:"created_at"`
@@ -56,6 +57,20 @@ func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Member, err
 	return mems, nil
 }
 
+func ListMembersAccount(accID bson.ObjectId, skip, limit int) ([]Member, error) {
+	mems := []Member{}
+	err := sess.DB("").C(memberC).
+		Find(bson.M{"account_id": accID}).
+		Skip(skip).
+		Limit(limit).
+		Sort("-created_at").
+		All(&mems)
+	if err != nil {
+		return nil, err
+	}
+	return mems, nil
+}
+
 func (m *Member) Account() (*Account, error) {
 	return GetAccount(m.AccountID)
 }
@@ -66,6 +81,10 @@ func (m *Member) Inviter() (*Account, error) {
 
 func (m *Member) Project() (*Project, error) {
 	return GetProject(m.ProjectID)
+}
+
+func (m *Member) Organization() (*Organization, error) {
+	return GetOraganization(m.OrganizationID)
 }
 
 func (m *Member) Put() error {

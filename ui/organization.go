@@ -211,10 +211,11 @@ func HandleProjectCreate(w http.ResponseWriter, r *http.Request) {
 	catch(r, err)
 
 	mem := data.Member{
-		ProjectID: prj.ID,
-		AccountID: prj.OwnerID,
-		InviterID: prj.OwnerID,
-		InvitedAt: time.Now(),
+		OrganizationID: prj.OrganizationID,
+		ProjectID:      prj.ID,
+		AccountID:      prj.OwnerID,
+		InviterID:      prj.OwnerID,
+		InvitedAt:      time.Now(),
 	}
 	err = mem.Put()
 	catch(r, err)
