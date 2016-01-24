@@ -1,8 +1,11 @@
 package ui
 
 import (
+	"log"
+	"net"
 	"net/http"
 	"os"
+	"syscall"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -49,7 +52,26 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	context.Set(r, "context", &ctx)
 
-	s.Router.ServeHTTP(w, r)
+	func() {
+		defer func() {
+			err := recover()
+			if err != nil {
+				switch err := err.(type) {
+				case *net.OpError:
+					if err.Err == syscall.EPIPE || err.Err == syscall.ECONNRESET {
+						break
+					}
+				case error:
+					log.Print(err)
+					ServeInternalServerError(w, r)
+				default:
+					panic(err)
+				}
+			}
+			context.Clear(r)
+		}()
+		s.Router.ServeHTTP(w, r)
+	}()
 }
 
 func NewServer() *Server {
