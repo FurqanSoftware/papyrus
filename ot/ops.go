@@ -34,6 +34,8 @@ func (u Ops) SpanTarget() int {
 }
 
 func (u Ops) Compact() Ops {
+	// return u
+
 	z := Ops{}
 	for i := 0; i < len(u); i++ {
 		t := u[i]
@@ -43,7 +45,8 @@ func (u Ops) Compact() Ops {
 			for j := i + 1; j < len(u); j++ {
 				switch b := u[j].(type) {
 				case RetainOp:
-					t = a + b
+					a += b
+					t = a
 					i++
 
 				default:
@@ -55,7 +58,8 @@ func (u Ops) Compact() Ops {
 			for j := i + 1; j < len(u); j++ {
 				switch b := u[j].(type) {
 				case InsertOp:
-					t = a + b
+					a += b
+					t = a
 					i++
 
 				default:
@@ -67,7 +71,8 @@ func (u Ops) Compact() Ops {
 			for j := i + 1; j < len(u); j++ {
 				switch b := u[j].(type) {
 				case DeleteOp:
-					t = a + b
+					a += b
+					t = a
 					i++
 
 				default:
@@ -135,7 +140,7 @@ func (u Ops) Compose(v Ops) (z Ops, err error) {
 		r.Next(q)
 	}
 
-	return
+	return z.Compact(), nil
 }
 
 func (u Ops) Transform(v Ops) (up, vp Ops, err error) {
@@ -197,7 +202,7 @@ func (u Ops) Transform(v Ops) (up, vp Ops, err error) {
 		r.Next(q)
 	}
 
-	return
+	return up.Compact(), vp.Compact(), nil
 }
 
 type Cursor struct {
