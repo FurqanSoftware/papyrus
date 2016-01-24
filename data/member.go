@@ -84,7 +84,7 @@ func (m *Member) Project() (*Project, error) {
 }
 
 func (m *Member) Organization() (*Organization, error) {
-	return GetOraganization(m.OrganizationID)
+	return GetOrganization(m.OrganizationID)
 }
 
 func (m *Member) Put() error {

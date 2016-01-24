@@ -58,7 +58,7 @@ func (p *Project) Members() ([]Member, error) {
 }
 
 func (p *Project) Organization() (*Organization, error) {
-	return GetOraganization(p.OrganizationID)
+	return GetOrganization(p.OrganizationID)
 }
 
 func (p *Project) Owner() (*Account, error) {

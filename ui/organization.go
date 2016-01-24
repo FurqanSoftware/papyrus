@@ -97,7 +97,7 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := bson.ObjectIdHex(idStr)
-	org, err := data.GetOraganization(id)
+	org, err := data.GetOrganization(id)
 	catch(r, err)
 	if org == nil {
 		ServeNotFound(w, r)
@@ -138,7 +138,7 @@ func ServeProjectNew(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := bson.ObjectIdHex(idStr)
-	org, err := data.GetOraganization(id)
+	org, err := data.GetOrganization(id)
 	catch(r, err)
 	if org == nil {
 		ServeNotFound(w, r)
@@ -177,7 +177,7 @@ func HandleProjectCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := bson.ObjectIdHex(idStr)
-	org, err := data.GetOraganization(id)
+	org, err := data.GetOrganization(id)
 	catch(r, err)
 	if org == nil {
 		ServeNotFound(w, r)

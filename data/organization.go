@@ -16,7 +16,7 @@ type Organization struct {
 	ModifiedAt time.Time     `bson:"modified_at"`
 }
 
-func GetOraganization(id bson.ObjectId) (*Organization, error) {
+func GetOrganization(id bson.ObjectId) (*Organization, error) {
 	org := Organization{}
 	err := sess.DB("").C(organizationC).FindId(id).One(&org)
 	if err == mgo.ErrNotFound {
