@@ -1,51 +1,32 @@
 {{define "styles"}}{{end}}
 {{define "main"}}
 	<div class="col-md-9">
-		<div class="row">
-			<div class="col-md-2">
-				<a class="btn btn-block btn-primary" href="/organizations/new">New organization</a>
+		<div class="btn-toolbar">
+			<div class="btn-group">
+				<a class="btn btn-block btn-primary" href="/organizations/new">New Organization</a>
 			</div>
 		</div>
 		<br>
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<div class="panel-title">
-					<h4>My organizations</h4>
-				</div>
+				<h4>Organizations</h4>
 			</div>
-			<div class="panel-body">
-				{{if eq (len .Organizations) 0}}
-					<p class="text-center">
-						You have no organization
-					</p>
+				{{if and (eq (len .Organizations) 0) (eq (len .InvOrganizations) 0)}}
+					<div class="panel-body">
+						<p class="text-center">
+							You have no organizations
+						</p>
+					</div>
 				{{else}}
 					<div class="list-group">
 						{{range $org := .Organizations}}
 							<a href="/organizations/{{$org.ID.Hex}}/projects" class="list-group-item">{{$org.Name}}</a>
 						{{end}}
-					</div>
-				{{end}}
-			</div>
-		</div>
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="panel-title">
-					<h4>Invited organizations</h4>
-				</div>
-			</div>
-			<div class="panel-body">
-				{{if eq (len .InvOrganizations) 0}}
-					<p class="text-center">
-						You have no invited organization
-					</p>
-				{{else}}
-					<div class="list-group">
 						{{range $org := .InvOrganizations}}
 							<a href="/organizations/{{$org.ID.Hex}}/projects" class="list-group-item">{{$org.Name}}</a>
 						{{end}}
 					</div>
 				{{end}}
-			</div>
 		</div>
 	</div>
 {{end}}
