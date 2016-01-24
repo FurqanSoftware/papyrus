@@ -175,7 +175,7 @@ func HandleDocumentPublish(w http.ResponseWriter, r *http.Request) {
 
 	doc, err := data.GetDocument(id)
 	catch(r, err)
-	if doc == nil {
+	if doc == nil || doc.Deleted {
 		ServeNotFound(w, r)
 		return
 	}
@@ -192,8 +192,8 @@ func HandleDocumentPublish(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	doc.PublishedAt = doc.ModifiedAt
 	doc.Published = true
+	doc.PublishedAt = time.Now()
 	doc.ShortID, err = data.GenerateShortID()
 	catch(r, err)
 	err = doc.Put()
@@ -204,6 +204,51 @@ func HandleDocumentPublish(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/documents/"+doc.ID.Hex(), http.StatusSeeOther)
+}
+
+func HandleDocumentDelete(w http.ResponseWriter, r *http.Request) {
+
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	if !bson.IsObjectIdHex(idStr) {
+		ServeNotFound(w, r)
+		return
+	}
+	id := bson.ObjectIdHex(idStr)
+
+	doc, err := data.GetDocument(id)
+	catch(r, err)
+	if doc == nil || doc.Deleted {
+		ServeNotFound(w, r)
+		return
+	}
+
+	prj, err := doc.Project()
+	catch(r, err)
+
+	if prj.OwnerID != ctx.Account.ID {
+		ServeForbidden(w, r)
+		return
+	}
+
+	if doc.Published {
+		http.Redirect(w, r, "/documents/"+doc.ID.Hex(), http.StatusSeeOther)
+		return
+	}
+
+	doc.Deleted = true
+	doc.DeletedAt = time.Now()
+	err = doc.Put()
+	catch(r, err)
+
+	http.Redirect(w, r, "/projects/"+prj.ID.Hex(), http.StatusSeeOther)
 }
 
 func init() {
@@ -223,4 +268,8 @@ func init() {
 		Methods("POST").
 		Path("/documents/{id}/publish").
 		HandlerFunc(HandleDocumentPublish)
+	Router.NewRoute().
+		Methods("POST").
+		Path("/documents/{id}/delete").
+		HandlerFunc(HandleDocumentDelete)
 }

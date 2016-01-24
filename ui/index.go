@@ -101,7 +101,7 @@ func ServeDocumentPage(w http.ResponseWriter, r *http.Request) {
 	doc, err := data.GetDocumentShortID(idStr)
 	catch(r, err)
 
-	if doc == nil {
+	if doc == nil || doc.Deleted {
 		ServeNotFound(w, r)
 		return
 	}

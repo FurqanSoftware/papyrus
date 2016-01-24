@@ -17,6 +17,8 @@ type Document struct {
 	Tags        []string      `bson:"tags"`
 	Published   bool          `bson:"publishd"`
 	PublishedAt time.Time     `bson:"pushlished_at"`
+	Deleted     bool          `bson:"deleted"`
+	DeletedAt   time.Time     `bson:"deleted_at"`
 	AccessToken string        `bson:"access_token"`
 	CreatedAt   time.Time     `bson:"created_at"`
 	ModifiedAt  time.Time     `bson:"modified_at"`
@@ -64,7 +66,7 @@ func GenerateShortID() (string, error) {
 func ListDocumentsProject(projectID bson.ObjectId, skip, limit int) ([]Document, error) {
 	docs := []Document{}
 	err := sess.DB("").C(documentC).
-		Find(bson.M{"project_id": projectID}).
+		Find(bson.M{"project_id": projectID, "deleted": bson.M{"$ne": true}}).
 		Skip(skip).
 		Limit(limit).
 		Sort("-created_at").
