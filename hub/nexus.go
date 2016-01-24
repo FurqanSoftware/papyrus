@@ -68,6 +68,12 @@ func (r *nexus) detach(sock *glue.Socket) {
 }
 
 func (r *nexus) broadcast(docID string, data interface{}) error {
+	doc := r.docs[docID]
+	err := r.repo.Put(docID, doc)
+	if err != nil {
+		return err
+	}
+
 	b, err := json.Marshal(data)
 	if err != nil {
 		return err

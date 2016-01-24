@@ -19,7 +19,11 @@ type Repo struct {
 }
 
 func New() *Repo {
-	repo := &Repo{}
+	repo := &Repo{
+		docs:   map[string]*hub.Doc{},
+		syncCh: make(chan *hub.Doc),
+		nextCh: make(chan string),
+	}
 	go repo.loop()
 	return repo
 }

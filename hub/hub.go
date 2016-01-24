@@ -2,10 +2,13 @@ package hub
 
 import (
 	"encoding/json"
+	"errors"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/desertbit/glue"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gophergala2016/papyrus/ot"
 )
 
@@ -38,13 +41,30 @@ func New(repo Repo) *Hub {
 
 func (h *Hub) processAttachIn() {
 	for v := range h.attachInCh {
-		err := h.nexus.attach(v.Socket, v.DocumentID)
+		token, err := jwt.Parse(v.Token, func(token *jwt.Token) (interface{}, error) {
+			_, ok := token.Method.(*jwt.SigningMethodHMAC)
+			if !ok {
+				return nil, errors.New("unexpected signing method")
+			}
+			return []byte(os.Getenv("SECRET")), nil
+		})
+		if err != nil {
+			h.sendError(v.Socket, "invalid token")
+			return
+		}
+		docID, ok := token.Claims["documentID"].(string)
+		if !ok {
+			h.sendError(v.Socket, "invalid token")
+			return
+		}
+
+		err = h.nexus.attach(v.Socket, docID)
 		if err != nil {
 			h.sendError(v.Socket, "internal server error")
 			return
 		}
 
-		_, ok := h.nexus.sockDoc[v.Socket]
+		_, ok = h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not found")
 			return
@@ -129,8 +149,8 @@ func (h *Hub) HandleSocket(sock *glue.Socket) {
 		switch fields[0] {
 		case "attach":
 			h.attachInCh <- AttachIn{
-				Socket:     sock,
-				DocumentID: fields[1],
+				Socket: sock,
+				Token:  fields[1],
 			}
 
 		case "change":
@@ -200,7 +220,7 @@ func (d ChangeData) Change() Change {
 type AttachIn struct {
 	Socket *glue.Socket
 
-	DocumentID string
+	Token string
 }
 
 type AttachOut struct {
