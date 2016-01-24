@@ -2,9 +2,9 @@ package ui
 
 import (
 	"bytes"
+	"html/template"
 	"io"
 	"net/http"
-	"text/template"
 )
 
 func ServeHTMLTemplate(w http.ResponseWriter, r *http.Request, tpl *template.Template, data interface{}) {
