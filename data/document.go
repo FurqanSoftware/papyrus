@@ -47,6 +47,10 @@ func ListDocumentsProject(projectID bson.ObjectId, skip, limit int) ([]Document,
 	return docs, nil
 }
 
+func (d *Document) Project() (*Project, error) {
+	return GetProject(d.ProjectID)
+}
+
 func (d *Document) Put() error {
 	d.ModifiedAt = time.Now()
 
