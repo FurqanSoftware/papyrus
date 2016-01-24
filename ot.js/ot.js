@@ -3,6 +3,7 @@ var errBadSpans = new Error('ot.js: base span doesn\'t match target span')
 var errTooShort = new Error('ot.js: operations are too short')
 var errTooLong = new Error('ot.js: operations are too long')
 var errBadOpPair = new Error('ot.js: invalid pair of operations')
+var errBadSpan = new Error("ot.js: base span doesn't match blob length")
 
 var noop = 0
 
@@ -142,12 +143,27 @@ function opsSpanTarget(u) {
 	var l = 0
 	u.forEach(function(o) {
 		if(opType(o) == 'delete') {
-			l -= opSpan(o)
-		} else {
-			l += opSpan(o)
+			return
 		}
+		l += opSpan(o)
 	})
 	return l
+}
+
+function opsCompact(u) {
+	var z = []
+	for(var i = 0; i < u.length; i++) {
+		var t = u[i]
+		for(j = i+1; j < u.length && opType(u[i]) === opType(u[j]); j++) {
+			t += u[j]
+			i++
+		}
+		if(!t) {
+			continue
+		}
+		z.push(t)
+	}
+	return z
 }
 
 function opsCompose(u, v) {
@@ -218,7 +234,7 @@ function opsCompose(u, v) {
 		cursorNext(r, q)
 	}
 
-	return z
+	return opsCompact(z)
 }
 
 function opsTransform(u, v) {
@@ -297,7 +313,7 @@ function opsTransform(u, v) {
 		cursorNext(r, q)
 	}
 
-	return [up, vp]
+	return [opsCompact(up), opsCompact(vp)]
 }
 
 function newCursor(ops) {
@@ -327,6 +343,37 @@ function cursorOp(c) {
 
 function cursorFin(c) {
 	return c.i >= c.ops.length
+}
+
+function blobApply(b, ops) {
+	if(opsSpanBase(ops) != b.length) {
+		throw errBadSpan
+	}
+
+	var z = ''
+
+	var i = 0
+	ops.forEach(function(o) {
+		switch(opType(o)) {
+		case 'retain':
+			z += b.substr(i, i+o)
+			i += o
+			break
+
+		case 'insert':
+			z += o
+			break
+
+		case 'delete':
+			i += -o
+			break
+		}
+	})
+	if(i !== b.length) {
+		throw errTooShort
+	}
+
+	return z
 }
 
 try {

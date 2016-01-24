@@ -26,12 +26,61 @@ func (u Ops) SpanTarget() int {
 	l := 0
 	for _, o := range u {
 		if o.Type() == OpDelete {
-			l -= o.Span()
-		} else {
-			l += o.Span()
+			continue
 		}
+		l += o.Span()
 	}
 	return l
+}
+
+func (u Ops) Compact() Ops {
+	z := Ops{}
+	for i := 0; i < len(u); i++ {
+		t := u[i]
+	s:
+		switch a := t.(type) {
+		case RetainOp:
+			for j := i + 1; j < len(u); j++ {
+				switch b := u[j].(type) {
+				case RetainOp:
+					t = a + b
+					i++
+
+				default:
+					break s
+				}
+			}
+
+		case InsertOp:
+			for j := i + 1; j < len(u); j++ {
+				switch b := u[j].(type) {
+				case InsertOp:
+					t = a + b
+					i++
+
+				default:
+					break s
+				}
+			}
+
+		case DeleteOp:
+			for j := i + 1; j < len(u); j++ {
+				switch b := u[j].(type) {
+				case DeleteOp:
+					t = a + b
+					i++
+
+				default:
+					break s
+				}
+			}
+		}
+		if t.IsZero() {
+			continue
+		}
+		z = append(z, t)
+	}
+	return z
 }
 
 func (u Ops) Compose(v Ops) (z Ops, err error) {
