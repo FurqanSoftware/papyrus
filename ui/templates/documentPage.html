@@ -24,7 +24,7 @@
 
 				var $previewDiv = $("#main")
 				var converter = new showdown.Converter()
-				$previewDiv.html(converter.makeHtml({{.Document.Content}}))
+				$previewDiv.html(converter.makeHtml("{{.Document.Content}}"))
 
 			})
 		</script>
