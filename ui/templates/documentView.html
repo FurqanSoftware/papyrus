@@ -3,7 +3,7 @@
 {{end}}
 
 {{define "main"}}
-	<div class="col-md-6">
+	<div class="col-md-12">
 		{{if .Document.ShortID}}
 			<a href="/d/{{.Document.ShortID}}" target="_blank">Share link</a>
 		{{else if eq .Project.OwnerID .Context.Account.ID}}
@@ -15,26 +15,15 @@
 			<hr>
 		{{end}}
 		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="panel-title">
-					<h4>{{.Document.Title}} editor</h4>
-				</div>
-			</div>
 			<div class="panel-body">
-				<form>
-					<textarea id="editor">{{.Document.Content}}</textarea>
-				</form>
-			</div>
-		</div>
-	</div>
-	<div class="col-md-6">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="panel-title">
-					<h4>{{.Document.Title}} view</h4>
+				<div class="row">
+					<div class="col-md-6">
+						<textarea id="editor">{{.Document.Content}}</textarea>
+					</div>
+					<div class="col-md-6">
+						<div id="preview"></div>
+					</div>
 				</div>
-			</div>
-			<div id="preview" class="panel-body">
 			</div>
 		</div>
 	</div>
