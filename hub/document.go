@@ -9,6 +9,7 @@ import (
 var ErrBadChange = errors.New("hub: invalid change")
 
 type Document struct {
+	ID      string
 	Blob    ot.Blob
 	History []Change
 }
@@ -29,15 +30,16 @@ func (d *Document) Apply(ch Change) (Change, error) {
 	if err != nil {
 		return Change{}, err
 	}
+	d.History = append(d.History, ch)
 	ch = Change{
 		Root: len(d.History),
 		Ops:  ops,
 	}
-	d.History = append(d.History, ch)
 	return ch, nil
 }
 
 type Change struct {
+	ID   string
 	Root int
 	Ops  ot.Ops
 }
