@@ -11,6 +11,7 @@ const (
 type Op interface {
 	Type() OpType
 	Span() int
+	IsZero() bool
 }
 
 type RetainOp int
@@ -21,6 +22,10 @@ func (p RetainOp) Type() OpType {
 
 func (p RetainOp) Span() int {
 	return int(p)
+}
+
+func (p RetainOp) IsZero() bool {
+	return p == 0
 }
 
 func (p RetainOp) ComposeRetain(q RetainOp) (Op, Op, Op) {
@@ -78,6 +83,10 @@ func (p InsertOp) Span() int {
 	return len(p)
 }
 
+func (p InsertOp) IsZero() bool {
+	return p == ""
+}
+
 func (p InsertOp) ComposeRetain(q RetainOp) (Op, Op, Op) {
 	switch {
 	case len(p) > int(q):
@@ -109,6 +118,10 @@ func (p DeleteOp) Type() OpType {
 
 func (p DeleteOp) Span() int {
 	return int(p)
+}
+
+func (p DeleteOp) IsZero() bool {
+	return p == 0
 }
 
 func (p DeleteOp) TransformRetain(q RetainOp) (Op, Op, Op, Op) {
