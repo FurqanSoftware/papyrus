@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/desertbit/glue"
 	"github.com/gophergala2016/papyrus/data"
+	"github.com/gophergala2016/papyrus/hub"
+	"github.com/gophergala2016/papyrus/repo"
 	"github.com/gophergala2016/papyrus/ui"
 )
 
@@ -19,6 +22,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	hub := hub.New(repo.New())
+
+	gs := glue.NewServer()
+	gs.OnNewSocket(hub.HandleSocket)
+	http.Handle("/glue/", gs)
 
 	http.Handle("/", ui.NewServer())
 
