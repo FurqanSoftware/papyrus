@@ -66,7 +66,7 @@ func GenerateShortID() (string, error) {
 func ListDocumentsProject(projectID bson.ObjectId, skip, limit int) ([]Document, error) {
 	docs := []Document{}
 	err := sess.DB("").C(documentC).
-		Find(bson.M{"project_id": projectID, "deleted": bson.M{"$ne": true}}).
+		Find(bson.M{"project_id": projectID, "deleted": false}).
 		Skip(skip).
 		Limit(limit).
 		Sort("-created_at").
