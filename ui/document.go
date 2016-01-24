@@ -3,7 +3,10 @@ package ui
 import (
 	"mime"
 	"net/http"
+	"os"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gophergala2016/papyrus/data"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
@@ -132,15 +135,24 @@ func ServeDocument(w http.ResponseWriter, r *http.Request) {
 	prj, err := doc.Project()
 	catch(r, err)
 
+	token := jwt.New(jwt.SigningMethodHS256)
+	token.Claims["accountID"] = ctx.Account.ID.Hex()
+	token.Claims["documentID"] = doc.ID.Hex()
+	token.Claims["expires"] = time.Now().Add(time.Minute * 15).Unix()
+	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	catch(r, err)
+
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplServeDocument, struct {
 		Context  *Context
 		Project  *data.Project
 		Document *data.Document
+		Token    string
 	}{
 		Context:  ctx,
 		Project:  prj,
 		Document: doc,
+		Token:    tokenString,
 	})
 }
 
