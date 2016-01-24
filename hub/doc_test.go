@@ -7,14 +7,14 @@ import (
 	"github.com/gophergala2016/papyrus/ot"
 )
 
-func TestDocumentApply(t *testing.T) {
+func TestDocApply(t *testing.T) {
 	cases := []struct {
-		doc  Document
+		doc  Doc
 		chgs []Change
 		exp  ot.Blob
 	}{
 		{
-			doc: Document{
+			doc: Doc{
 				Blob: ot.Blob("Lem sum lor"),
 			},
 			chgs: []Change{

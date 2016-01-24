@@ -8,13 +8,13 @@ import (
 
 var ErrBadChange = errors.New("hub: invalid change")
 
-type Document struct {
+type Doc struct {
 	ID      string
 	Blob    ot.Blob
 	History []Change
 }
 
-func (d *Document) Head() Change {
+func (d *Doc) Head() Change {
 	return Change{
 		ID:   "",
 		Root: len(d.History),
@@ -22,7 +22,7 @@ func (d *Document) Head() Change {
 	}
 }
 
-func (d *Document) Apply(ch Change) (Change, error) {
+func (d *Doc) Apply(ch Change) (Change, error) {
 	if ch.Root < 0 || ch.Root > len(d.History) {
 		return Change{}, ErrBadChange
 	}
