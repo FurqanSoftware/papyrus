@@ -10,23 +10,23 @@ import (
 )
 
 type Hub struct {
-	attachInChan  chan AttachIn
-	attachOutChan chan AttachOut
-	changeInChan  chan ChangeIn
-	changeOutChan chan ChangeOut
-	errorOutChan  chan ErrorOut
+	attachInCh  chan AttachIn
+	attachOutCh chan AttachOut
+	changeInCh  chan ChangeIn
+	changeOutCh chan ChangeOut
+	errorOutCh  chan ErrorOut
 
 	nexus *nexus
 }
 
 func New(repo Repo) *Hub {
 	hub := &Hub{
-		attachInChan:  make(chan AttachIn),
-		attachOutChan: make(chan AttachOut),
-		changeInChan:  make(chan ChangeIn),
-		changeOutChan: make(chan ChangeOut),
-		errorOutChan:  make(chan ErrorOut),
-		nexus:         newNexus(repo),
+		attachInCh:  make(chan AttachIn),
+		attachOutCh: make(chan AttachOut),
+		changeInCh:  make(chan ChangeIn),
+		changeOutCh: make(chan ChangeOut),
+		errorOutCh:  make(chan ErrorOut),
+		nexus:       newNexus(repo),
 	}
 	go hub.processAttachIn()
 	go hub.processAttachOut()
@@ -37,7 +37,7 @@ func New(repo Repo) *Hub {
 }
 
 func (h *Hub) processAttachIn() {
-	for v := range h.attachInChan {
+	for v := range h.attachInCh {
 		err := h.nexus.attach(v.Socket, v.DocumentID)
 		if err != nil {
 			h.sendError(v.Socket, "internal server error")
@@ -50,14 +50,14 @@ func (h *Hub) processAttachIn() {
 			return
 		}
 
-		h.attachOutChan <- AttachOut{
+		h.attachOutCh <- AttachOut{
 			Socket: v.Socket,
 		}
 	}
 }
 
 func (h *Hub) processAttachOut() {
-	for v := range h.attachOutChan {
+	for v := range h.attachOutCh {
 		doc, ok := h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not attached")
@@ -74,7 +74,7 @@ func (h *Hub) processAttachOut() {
 }
 
 func (h *Hub) processChangeIn() {
-	for v := range h.changeInChan {
+	for v := range h.changeInCh {
 		doc, ok := h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not found")
@@ -87,7 +87,7 @@ func (h *Hub) processChangeIn() {
 			return
 		}
 
-		h.changeOutChan <- ChangeOut{
+		h.changeOutCh <- ChangeOut{
 			Socket: v.Socket,
 			Change: ch,
 		}
@@ -95,7 +95,7 @@ func (h *Hub) processChangeIn() {
 }
 
 func (h *Hub) processChangeOut() {
-	for v := range h.changeOutChan {
+	for v := range h.changeOutCh {
 		doc, ok := h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not attached")
@@ -107,7 +107,7 @@ func (h *Hub) processChangeOut() {
 }
 
 func (h *Hub) processErrorOut() {
-	for v := range h.errorOutChan {
+	for v := range h.errorOutCh {
 		h.sendError(v.Socket, v.Message)
 	}
 }
@@ -128,7 +128,7 @@ func (h *Hub) HandleSocket(sock *glue.Socket) {
 		}
 		switch fields[0] {
 		case "attach":
-			h.attachInChan <- AttachIn{
+			h.attachInCh <- AttachIn{
 				Socket:     sock,
 				DocumentID: fields[1],
 			}
@@ -141,7 +141,7 @@ func (h *Hub) HandleSocket(sock *glue.Socket) {
 				return
 			}
 
-			h.changeInChan <- ChangeIn{
+			h.changeInCh <- ChangeIn{
 				Socket: sock,
 				Change: data.Change(),
 			}
