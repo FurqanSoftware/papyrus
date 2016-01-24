@@ -1,10 +1,12 @@
 {{define "main"}}
 	<div class="col-md-9">
-		<div class="row">
-			<div class="col-md-2">
-				<a class="btn btn-block btn-primary" href="/organizations/{{.Organization.ID.Hex}}/projects/new">New project</a>
+		{{if eq .Organization.OwnerID .Context.Account.ID}}
+			<div class="row">
+				<div class="col-md-2">
+					<a class="btn btn-block btn-primary" href="/organizations/{{.Organization.ID.Hex}}/projects/new">New project</a>
+				</div>
 			</div>
-		</div>
+		{{end}}
 		<br>
 		<div class="panel panel-default">
 			<div class="panel-heading">
