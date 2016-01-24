@@ -1,89 +1,73 @@
 package hub
 
 import (
-	"sync"
+	"encoding/json"
 
 	"github.com/desertbit/glue"
 )
 
 type Registry struct {
 	socks map[string]map[*glue.Socket]bool
-	rooms map[*glue.Socket]map[string]bool
-
-	mutex sync.RWMutex
+	docs  map[*glue.Socket]*Document
 }
 
 func NewRegistry() *Registry {
 	return &Registry{
 		socks: map[string]map[*glue.Socket]bool{},
-		rooms: map[*glue.Socket]map[string]bool{},
+		docs:  map[*glue.Socket]*Document{},
 	}
 }
 
-func (r *Registry) register(sock *glue.Socket, room string) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	if r.socks[room] == nil {
-		r.socks[room] = map[*glue.Socket]bool{}
+func (r *Registry) attach(sock *glue.Socket, docID string) error {
+	doc, err := DefaultRepository.Get(docID)
+	if err != nil {
+		return err
 	}
-	r.socks[room][sock] = true
 
-	if r.rooms[sock] == nil {
-		r.rooms[sock] = map[string]bool{}
+	if r.socks[docID] == nil {
+		r.socks[docID] = map[*glue.Socket]bool{}
 	}
-	r.rooms[sock][room] = true
+	r.socks[docID][sock] = true
+
+	if r.docs[sock] != nil {
+		delete(r.socks[docID], sock)
+	}
+	r.docs[sock] = doc
+
+	return nil
 }
 
-func (r *Registry) deregister(sock *glue.Socket, room string) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	_, ok := r.socks[room]
+func (r *Registry) detach(sock *glue.Socket) {
+	doc, ok := r.docs[sock]
 	if !ok {
 		return
 	}
-	_, ok = r.rooms[sock]
-	if !ok {
-		return
-	}
-
-	delete(r.socks[room], sock)
-	delete(r.rooms[sock], room)
-
-	if len(r.socks[room]) == 0 {
-		delete(r.socks, room)
-	}
-	if len(r.rooms[sock]) == 0 {
-		delete(r.rooms, sock)
-	}
-}
-
-func (r *Registry) deregisterAll(sock *glue.Socket) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	_, ok := r.rooms[sock]
+	_, ok = r.socks[doc.ID]
 	if !ok {
 		return
 	}
 
-	for room := range r.rooms[sock] {
-		delete(r.socks[room], sock)
-		if len(r.socks[room]) == 0 {
-			delete(r.socks, room)
-		}
+	delete(r.socks[doc.ID], sock)
+	delete(r.docs, sock)
+
+	if len(r.socks[doc.ID]) == 0 {
+		delete(r.socks, doc.ID)
 	}
-	delete(r.rooms, sock)
 }
 
-func (r *Registry) deliver(room string, data string) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	for sock := range r.socks[room] {
-		sock.Write(data)
+func (r *Registry) broadcast(docID string, data interface{}) error {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
 	}
+	for sock := range r.socks[docID] {
+		sock.Write("change " + string(b))
+	}
+	return nil
+}
+
+func (r *Registry) document(sock *glue.Socket) *Document {
+	return r.docs[sock]
 }
 
 var registry = NewRegistry()

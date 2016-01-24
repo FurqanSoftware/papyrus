@@ -99,7 +99,7 @@
 			})
 
 			var socket = glue()
-			socket.send('subscribe 1')
+			socket.send('attach 1')
 			socket.onMessage(function(data) {
 				var fields = [data.substr(0, data.indexOf(' ')), data.substr(data.indexOf(' ')+1)]
 				switch(fields[0]) {
@@ -151,10 +151,6 @@
 							})
 						})
 					}
-					break
-
-				case 'subscribed':
-					ready = true
 					break
 				}
 			})

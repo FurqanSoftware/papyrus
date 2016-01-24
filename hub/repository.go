@@ -31,6 +31,7 @@ func (r *Repository) Get(id string) (*Document, error) {
 			return nil, nil
 		}
 		doc = &Document{
+			ID:   id,
 			Blob: blob,
 		}
 		r.Documents[id] = doc

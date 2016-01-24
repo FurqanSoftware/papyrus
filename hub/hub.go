@@ -2,8 +2,7 @@ package hub
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
+	"strconv"
 	"strings"
 
 	"github.com/desertbit/glue"
@@ -16,12 +15,169 @@ type ChangeData struct {
 	Ops  []interface{} `json:"ops"`
 }
 
+func NewChangeData(ch Change) ChangeData {
+	data := ChangeData{
+		ID:   ch.ID,
+		Root: ch.Root,
+		Ops:  []interface{}{},
+	}
+	for _, o := range ch.Ops {
+		switch o := o.(type) {
+		case ot.RetainOp:
+			data.Ops = append(data.Ops, int(o))
+
+		case ot.InsertOp:
+			data.Ops = append(data.Ops, string(o))
+
+		case ot.DeleteOp:
+			data.Ops = append(data.Ops, -int(o))
+		}
+	}
+	return data
+}
+
+func (d ChangeData) Change() Change {
+	ch := Change{
+		ID:   d.ID,
+		Root: d.Root,
+	}
+	for _, u := range d.Ops {
+		switch u := u.(type) {
+		case string:
+			ch.Ops = append(ch.Ops, ot.InsertOp(u))
+
+		case float64:
+			if u >= 0 {
+				ch.Ops = append(ch.Ops, ot.RetainOp(u))
+			} else {
+				ch.Ops = append(ch.Ops, ot.DeleteOp(-u))
+			}
+		}
+	}
+	return ch
+}
+
+type AttachIn struct {
+	Socket *glue.Socket
+
+	DocumentID string
+}
+
+type AttachOut struct {
+	Socket *glue.Socket
+}
+
+type ChangeIn struct {
+	Socket *glue.Socket
+
+	Change Change
+}
+
+type ChangeOut struct {
+	Socket *glue.Socket
+
+	Change Change
+}
+
+type ErrorOut struct {
+	Socket *glue.Socket
+
+	Error   error
+	Message string
+}
+
+var (
+	AttachInChan  = make(chan AttachIn)
+	AttachOutChan = make(chan AttachOut)
+	ChangeInChan  = make(chan ChangeIn)
+	ChangeOutChan = make(chan ChangeOut)
+	ErrorOutChan  = make(chan ErrorOut)
+)
+
+func processAttachIn() {
+	for v := range AttachInChan {
+		err := registry.attach(v.Socket, v.DocumentID)
+		if err != nil {
+			sendError(v.Socket, "internal server error")
+			return
+		}
+
+		doc := registry.document(v.Socket)
+		if doc == nil {
+			sendError(v.Socket, "not found")
+			return
+		}
+
+		AttachOutChan <- AttachOut{
+			Socket: v.Socket,
+		}
+	}
+}
+
+func processAttachOut() {
+	for v := range AttachOutChan {
+		doc := registry.document(v.Socket)
+		if doc == nil {
+			sendError(v.Socket, "not attached")
+			return
+		}
+
+		b, err := json.Marshal(NewChangeData(doc.Head()))
+		if err != nil {
+			sendError(v.Socket, "internal server error")
+			return
+		}
+		v.Socket.Write("change " + string(b))
+	}
+}
+
+func processChangeIn() {
+	for v := range ChangeInChan {
+		doc := registry.document(v.Socket)
+		if doc == nil {
+			sendError(v.Socket, "not found")
+			return
+		}
+
+		ch, err := doc.Apply(v.Change)
+		if err != nil {
+			sendError(v.Socket, "invalid change")
+			return
+		}
+
+		ChangeOutChan <- ChangeOut{
+			Socket: v.Socket,
+			Change: ch,
+		}
+	}
+}
+
+func processChangeOut() {
+	for v := range ChangeOutChan {
+		doc := registry.document(v.Socket)
+		if doc == nil {
+			sendError(v.Socket, "not attached")
+			return
+		}
+
+		registry.broadcast(doc.ID, NewChangeData(v.Change))
+	}
+}
+
+func processErrorOut() {
+	for v := range ErrorOutChan {
+		sendError(v.Socket, v.Message)
+	}
+}
+
+func sendError(sock *glue.Socket, msg string) {
+	sock.Write("error " + strconv.Quote(msg))
+}
+
 func HandleSocket(sock *glue.Socket) {
 	sock.OnClose(func() {
-		registry.deregisterAll(sock)
+		registry.detach(sock)
 	})
-
-	var doc *Document
 
 	sock.OnRead(func(data string) {
 		fields := strings.SplitN(data, " ", 2)
@@ -29,92 +185,32 @@ func HandleSocket(sock *glue.Socket) {
 			return
 		}
 		switch fields[0] {
-		case "subscribe":
-			var err error
-			doc, err = DefaultRepository.Get(fields[1])
-			if err != nil {
-				sock.Write("error \"internal server error\"")
-				return
+		case "attach":
+			AttachInChan <- AttachIn{
+				Socket:     sock,
+				DocumentID: fields[1],
 			}
-			if doc == nil {
-				sock.Write("error \"not found\"")
-				return
-			}
-
-			registry.register(sock, "document:"+doc.ID)
-
-			data := ChangeData{
-				ID:   "",
-				Root: len(doc.History),
-				Ops:  []interface{}{string(doc.Blob)},
-			}
-			dataB, err := json.Marshal(data)
-			if err != nil {
-				sock.Write("error \"internal server error\"")
-				return
-			}
-			sock.Write("change " + string(dataB))
 
 		case "change":
 			data := ChangeData{}
 			err := json.Unmarshal([]byte(fields[1]), &data)
 			if err != nil {
-				sock.Write("error \"bad request\"")
+				sendError(sock, "bad request")
 				return
 			}
 
-			ch := Change{}
-			ch.ID = data.ID
-			ch.Root = data.Root
-			for _, u := range data.Ops {
-				switch u := u.(type) {
-				case string:
-					ch.Ops = append(ch.Ops, ot.InsertOp(u))
-
-				case float64:
-					if u >= 0 {
-						ch.Ops = append(ch.Ops, ot.RetainOp(u))
-					} else {
-						ch.Ops = append(ch.Ops, ot.DeleteOp(-u))
-					}
-				}
+			ChangeInChan <- ChangeIn{
+				Socket: sock,
+				Change: data.Change(),
 			}
-
-			ch, err = doc.Apply(ch)
-			if err != nil {
-				log.Print(err)
-
-				fmt.Printf("%#v\n", doc.History)
-				fmt.Printf("%#v\n", data)
-				fmt.Printf("%#v\n", ch)
-
-				sock.Write("error \"internal server error\"")
-				return
-			}
-
-			data = ChangeData{
-				ID:   data.ID,
-				Root: ch.Root,
-			}
-			for _, u := range ch.Ops {
-				switch u := u.(type) {
-				case ot.RetainOp:
-					data.Ops = append(data.Ops, int(u))
-
-				case ot.InsertOp:
-					data.Ops = append(data.Ops, string(u))
-
-				case ot.DeleteOp:
-					data.Ops = append(data.Ops, -int(u))
-				}
-			}
-
-			dataB, err := json.Marshal(data)
-			if err != nil {
-				sock.Write("error \"internal server error\"")
-			}
-
-			registry.deliver("document:"+doc.ID, "change "+string(dataB))
 		}
 	})
+}
+
+func init() {
+	go processAttachIn()
+	go processAttachOut()
+	go processChangeIn()
+	go processChangeOut()
+	go processErrorOut()
 }
