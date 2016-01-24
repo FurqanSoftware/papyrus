@@ -143,13 +143,22 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if org.OwnerID != ctx.Account.ID {
+	mems, err := data.ListMembersOrganizationAccount(org.ID, ctx.Account.ID, 0, math.MaxInt32)
+	catch(r, err)
+
+	if len(mems) == 0 {
 		ServeForbidden(w, r)
 		return
 	}
 
-	prjs, err := data.ListProjectsOrganization(org.ID, 0, math.MaxInt32)
-	catch(r, err)
+	prjs := []data.Project{}
+
+	for _, mem := range mems {
+		prj, err := mem.Project()
+		catch(r, err)
+
+		prjs = append(prjs, *prj)
+	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplServeOrganization, struct {
