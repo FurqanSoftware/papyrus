@@ -9,6 +9,34 @@ var indexes = map[string][]mgo.Index{
 			Unique: true,
 		},
 	},
+	documentC: {
+		{
+			Key:    []string{"short_id"},
+			Unique: true,
+		},
+		{
+			Key: []string{"project_id"},
+		},
+	},
+	memberC: {
+		{
+			Key:    []string{"project_id", "account_id"},
+			Unique: true,
+		},
+		{
+			Key: []string{"account_id", "organization_id"},
+		},
+	},
+	organizationC: {
+		{
+			Key: []string{"owner_id"},
+		},
+	},
+	projectC: {
+		{
+			Key: []string{"organization_id"},
+		},
+	},
 }
 
 func MakeIndexes() error {
