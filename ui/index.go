@@ -17,12 +17,11 @@ import (
 func ServeIndex(w http.ResponseWriter, r *http.Request) {
 	ctx := GetContext(r)
 
-	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplIndex, struct {
-		Context *Context
-	}{
-		Context: ctx,
-	})
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, "/organizations", http.StatusSeeOther)
 }
 
 func ServeLogin(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +44,7 @@ func HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := GetContext(r)
 
 	if ctx.Account != nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/organizations", http.StatusSeeOther)
 		return
 	}
 
@@ -73,21 +72,21 @@ func HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 
 	ctx.Session.Values["accountID"] = acc.ID.Hex()
 	ctx.Session.Save(r, w)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/organizations", http.StatusSeeOther)
 }
 
 func HandleLogout(w http.ResponseWriter, r *http.Request) {
 	ctx := GetContext(r)
 
 	if ctx.Account == nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	delete(ctx.Session.Values, "accountID")
 	ctx.Session.Save(r, w)
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func ServeDocumentPage(w http.ResponseWriter, r *http.Request) {
