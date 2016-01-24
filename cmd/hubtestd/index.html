@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Papyrus</title>
+
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/codemirror.min.css">
+	</head>
+
+	<body>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/codemirror.min.js"></script>
+		<script src="/assets/glue.js"></script>
+		<script src="/assets/ot.js"></script>
+
+		<script type="text/javascript">
+			window.SYNC_DELAY = 100
+
+			function codemirrorDocLength(doc) {
+				return doc.indexFromPos({ line: doc.lastLine(), ch: 0 }) + doc.getLine(doc.lastLine()).length
+			}
+
+			function codemirrorTextLen(text) {
+				return text.reduce(function(m, v) { return m+v.length+1 }, -1)
+			}
+
+			function codemirrorChangeLen(ch) {
+				return codemirrorTextLen(ch.text) - codemirrorTextLen(ch.removed)
+			}
+
+			function opsTransformIndex(ops, i) {
+				var ip = i
+				var ls = 0
+				ops.forEach(function(u) {
+					if(ls >= i) {
+						return
+					}
+					switch(opType(u)) {
+					case 'retain':
+						ls += opSpan(u)
+						break
+
+					case 'insert':
+						ip += opSpan(u)
+						ls += opSpan(u)
+						break
+
+					case 'delete':
+						ip -= opSpan(u)
+						ls += opSpan(u)
+						break
+					}
+				})
+				return ip
+			}
+
+			function changeToOps(doc, docLen, ch) {
+				var rl = doc.indexFromPos(ch.from)
+				var d = -codemirrorTextLen(ch.removed)
+				var i = ch.text.join('\n')
+				var rr = docLen - rl - codemirrorTextLen(ch.text)
+				return [rl, d, i, rr].filter(function(v) {
+					return !!v
+				})
+			}
+
+			var mirror = CodeMirror(document.body)
+			var opsBuf = null
+			var opsWait = null
+			var opsWaitID = ""
+			var opsRoot = 0
+			var skipChange = false
+			mirror.on('changes', function(event, changes) {
+				if(skipChange) {
+					skipChange = false
+					return
+				}
+				var opsTmp = null
+				var docLen = codemirrorDocLength(event.doc)
+				changes.slice().reverse().forEach(function(ch) {
+					if(ch.origin === 'setValue') {
+						return
+					}
+					if(opsTmp === null) {
+						opsTmp = changeToOps(event.doc, docLen, ch)
+					} else {
+						opsTmp = opsCompose(changeToOps(event.doc, docLen, ch), opsTmp)
+					}
+					docLen -= codemirrorChangeLen(ch)
+				})
+				if(opsBuf === null) {
+					opsBuf = opsTmp
+				} else {
+					opsBuf = opsCompose(opsBuf, opsTmp)
+				}
+				sync()
+			})
+
+			var socket = glue()
+			socket.send('attach 1')
+			socket.onMessage(function(data) {
+				var fields = [data.substr(0, data.indexOf(' ')), data.substr(data.indexOf(' ')+1)]
+				switch(fields[0]) {
+				case 'change':
+					var data = JSON.parse(fields[1])
+
+					opsRoot = data.root
+
+					if(data.id === "") {
+						mirror.getDoc().setValue(blobApply(mirror.getDoc().getValue(), data.ops))
+
+					} else if(data.id === opsWaitID) {
+						opsWait = null
+						sync()
+
+					} else {
+
+						var ops = data.ops
+						if(opsWait !== null) {
+							var e = opsTransform(opsWait, ops)
+							opsWait = e[0]
+							ops = e[1]
+						}
+						if(opsBuf !== null) {
+							var e = opsTransform(opsBuf, ops)
+							opsBuf = e[0]
+							ops = e[1]
+						}
+
+						var doc = mirror.getDoc()
+						skipChange = true
+						mirror.operation(function() {
+							var i = 0
+							ops.forEach(function(o) {
+								switch(opType(o)) {
+								case 'retain':
+									i += o
+									break
+
+								case 'insert':
+									mirror.replaceRange(o, mirror.posFromIndex(i))
+									i += o.length
+									break
+
+								case 'delete':
+									mirror.replaceRange('', mirror.posFromIndex(i), mirror.posFromIndex(i + (-o)))
+									break
+								}
+							})
+						})
+					}
+					break
+				}
+			})
+
+			function sync() {
+				if(opsWait !== null || opsBuf === null) {
+					return
+				}
+
+				opsWait = opsBuf
+				opsBuf = null
+				opsWaitID = new Date().getTime()+'-'+Math.round(1e9*Math.random())
+				socket.send('change '+JSON.stringify({
+					id: opsWaitID,
+					root: opsRoot,
+					ops: opsWait
+				}))
+			}
+			sync()
+		</script>
+	</body>
+</html>
