@@ -22,6 +22,32 @@
 				return doc.indexFromPos({ line: doc.lastLine(), ch: 0 }) + doc.getLine(doc.lastLine()).length
 			}
 
+			function opsTransformIndex(ops, i) {
+				var ip = i
+				var ls = 0
+				ops.forEach(function(u) {
+					if(ls >= i) {
+						return
+					}
+					switch(opType(u)) {
+					case 'retain':
+						ls += opSpan(u)
+						break
+
+					case 'insert':
+						ip += opSpan(u)
+						ls += opSpan(u)
+						break
+
+					case 'delete':
+						ip -= opSpan(u)
+						ls += opSpan(u)
+						break
+					}
+				})
+				return ip
+			}
+
 			function changeToOps(doc, ch) {
 				var rl = doc.indexFromPos(ch.from)
 				var d = -ch.removed.reduce(function(m, v) { return m+v.length+1 }, -1)
@@ -74,7 +100,10 @@
 							data.ops = e[1]
 						}
 
-						mirror.getDoc().setValue(blobApply(mirror.getDoc().getValue(), data.ops))
+						var doc = mirror.getDoc()
+						var selection = [doc.indexFromPos(doc.getCursor('anchor')), doc.indexFromPos(doc.getCursor('head'))]
+						doc.setValue(blobApply(doc.getValue(), data.ops))
+						doc.setSelection(doc.posFromIndex(opsTransformIndex(data.ops, selection[0])), doc.posFromIndex(opsTransformIndex(data.ops, selection[1])))
 					}
 					opsRoot = data.root
 					break
