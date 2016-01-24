@@ -13,6 +13,7 @@ var indexes = map[string][]mgo.Index{
 		{
 			Key:    []string{"short_id"},
 			Unique: true,
+			Sparse: true,
 		},
 		{
 			Key: []string{"project_id"},

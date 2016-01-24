@@ -10,7 +10,7 @@ import (
 type Document struct {
 	ID          bson.ObjectId `bson:"_id"`
 	ProjectID   bson.ObjectId `bson:"project_id"`
-	ShortID     string        `bson:"short_id"`
+	ShortID     string        `bson:"short_id,omitempty"`
 	Title       string        `bson:"title"`
 	Content     string        `bson:"content"`
 	Tags        []string      `bson:"tags"`
