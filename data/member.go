@@ -43,6 +43,20 @@ func GetMemberProjectAccount(pID bson.ObjectId, aID bson.ObjectId) (*Member, err
 	return &mem, nil
 }
 
+func ListMembersOrganizationAccount(orgID, accID bson.ObjectId, skip, limit int) ([]Member, error) {
+	mems := []Member{}
+	err := sess.DB("").C(memberC).
+		Find(bson.M{"organization_id": orgID, "account_id": accID}).
+		Skip(skip).
+		Limit(limit).
+		Sort("-created_at").
+		All(&mems)
+	if err != nil {
+		return nil, err
+	}
+	return mems, nil
+}
+
 func ListMembersProject(projectID bson.ObjectId, skip, limit int) ([]Member, error) {
 	mems := []Member{}
 	err := sess.DB("").C(memberC).
