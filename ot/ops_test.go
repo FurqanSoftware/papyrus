@@ -22,7 +22,7 @@ func TestOpsCompose(t *testing.T) {
 		{
 			in1: Ops{RetainOp(3), InsertOp("bar"), RetainOp(3)},
 			in2: Ops{RetainOp(1), DeleteOp(2), InsertOp("oo"), RetainOp(6)},
-			out: Ops{RetainOp(1), DeleteOp(2), InsertOp("oo"), InsertOp("bar"), RetainOp(3)},
+			out: Ops{RetainOp(1), DeleteOp(2), InsertOp("oobar"), RetainOp(3)},
 		},
 	}
 	for i, c := range cases {
@@ -47,16 +47,24 @@ func TestOpsTransform(t *testing.T) {
 		{
 			in1:  Ops{RetainOp(1), InsertOp("oo"), RetainOp(2), InsertOp("az")},
 			in2:  Ops{RetainOp(2), InsertOp("ar"), RetainOp(1)},
-			out1: Ops{RetainOp(1), InsertOp("oo"), RetainOp(1), RetainOp(2), RetainOp(1), InsertOp("az")},
-			out2: Ops{RetainOp(1), RetainOp(2), RetainOp(1), InsertOp("ar"), RetainOp(1), RetainOp(2)},
+			out1: Ops{RetainOp(1), InsertOp("oo"), RetainOp(4), InsertOp("az")},
+			out2: Ops{RetainOp(4), InsertOp("ar"), RetainOp(3)},
 		},
 
 		// Fuubbaz -> (Foobbaz, Fuubarbaz) -> Foobarbaz
 		{
 			in1:  Ops{RetainOp(1), DeleteOp(2), InsertOp("oo"), RetainOp(4)},
 			in2:  Ops{RetainOp(4), InsertOp("ar"), RetainOp(3)},
-			out1: Ops{RetainOp(1), DeleteOp(2), InsertOp("oo"), RetainOp(1), RetainOp(2), RetainOp(3)},
-			out2: Ops{RetainOp(1), RetainOp(2), RetainOp(1), InsertOp("ar"), RetainOp(3)},
+			out1: Ops{RetainOp(1), DeleteOp(2), InsertOp("oo"), RetainOp(6)},
+			out2: Ops{RetainOp(4), InsertOp("ar"), RetainOp(3)},
+		},
+
+		// Test 3
+		{
+			in1:  Ops{RetainOp(1), InsertOp("q"), RetainOp(9)},
+			in2:  Ops{RetainOp(10), InsertOp("v")},
+			out1: Ops{RetainOp(1), InsertOp("q"), RetainOp(10)},
+			out2: Ops{RetainOp(11), InsertOp("v")},
 		},
 	}
 	for i, c := range cases {
