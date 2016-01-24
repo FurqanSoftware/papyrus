@@ -128,12 +128,17 @@ func ServeDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	prj, err := doc.Project()
+	catch(r, err)
+
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplServeDocument, struct {
 		Context  *Context
+		Project  *data.Project
 		Document *data.Document
 	}{
 		Context:  ctx,
+		Project:  prj,
 		Document: doc,
 	})
 }

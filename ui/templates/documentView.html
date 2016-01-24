@@ -4,6 +4,20 @@
 
 {{define "main"}}
 	<div class="col-md-6">
+		{{if .Document.ShortID}}
+			<div class="row">
+				<pre>
+					{{.Document.ShortID}}
+				</pre>
+			</div>
+		{{else if eq .Project.OwnerID .Context.Account.ID}}
+			<div class="row">
+				<div class="col-md-2">
+					<a class="btn btn-block btn-primary" href="/documents/{{.Document.ID.Hex}}/publish" data-method="POST">Publish</a>
+				</div>
+			</div>
+			<hr>
+		{{end}}
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<div class="panel-title">
@@ -36,6 +50,16 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js"></script>
 	<script>
 		$(function(){
+
+			$('a[href][data-method]').on('click', function(event) {
+				event.preventDefault()
+				var $form = $('<form></form>').attr({
+					method: $(this).data('method'),
+					action: $(this).attr('href')
+				})
+				$('body').append($form)
+				$form[0].submit()
+			})
 
 			var $editorArea = $("#editor")
 			var $previewDiv = $("#preview")
