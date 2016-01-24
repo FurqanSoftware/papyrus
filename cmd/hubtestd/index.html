@@ -77,11 +77,9 @@
 					skipChange = false
 					return
 				}
-				console.log('input', changes)
 				var opsTmp = null
 				var docLen = codemirrorDocLength(event.doc)
 				changes.slice().reverse().forEach(function(ch) {
-					console.log('input -', ch)
 					if(ch.origin === 'setValue') {
 						return
 					}
@@ -97,7 +95,6 @@
 				} else {
 					opsBuf = opsCompose(opsBuf, opsTmp)
 				}
-				console.log('buffer', opsBuf)
 				sync()
 			})
 
@@ -112,16 +109,13 @@
 					opsRoot = data.root
 
 					if(data.id === "") {
-						console.log('initial', data.ops, data.root)
 						mirror.getDoc().setValue(blobApply(mirror.getDoc().getValue(), data.ops))
 
 					} else if(data.id === opsWaitID) {
-						console.log('acknowledgement', data.ops, data.root)
 						opsWait = null
 						sync()
 
 					} else {
-						console.log('external', data.ops, data.root)
 
 						var ops = data.ops
 						if(opsWait !== null) {
@@ -136,9 +130,6 @@
 						}
 
 						var doc = mirror.getDoc()
-						// var selection = [doc.indexFromPos(doc.getCursor('anchor')), doc.indexFromPos(doc.getCursor('head'))]
-						// doc.setValue(blobApply(doc.getValue(), ops))
-						// doc.setSelection(doc.posFromIndex(opsTransformIndex(ops, selection[0])), doc.posFromIndex(opsTransformIndex(ops, selection[1])))
 						skipChange = true
 						mirror.operation(function() {
 							var i = 0
@@ -176,7 +167,6 @@
 				opsWait = opsBuf
 				opsBuf = null
 				opsWaitID = new Date().getTime()+'-'+Math.round(1e9*Math.random())
-				console.log('change ', opsWait, opsRoot)
 				socket.send('change '+JSON.stringify({
 					id: opsWaitID,
 					root: opsRoot,
