@@ -146,7 +146,7 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 	mems, err := data.ListMembersOrganizationAccount(org.ID, ctx.Account.ID, 0, math.MaxInt32)
 	catch(r, err)
 
-	if len(mems) == 0 {
+	if org.OwnerID != ctx.Account.ID && len(mems) == 0 {
 		ServeForbidden(w, r)
 		return
 	}
