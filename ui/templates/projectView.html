@@ -40,14 +40,15 @@
 				<div class="panel panel-default">
 					<div class="panel-heading">
 						<div class="panel-title">
-							<h4>{{.Project.Name}}'s members</h4>
+							<h4>{{.Project.Name}}'s Members</h4>
 						</div>
 					</div>
-					<div class="panel-body">
 						{{if eq (len .Members) 0}}
-							<p class="text-center">
-								No member is added
-							</p>
+							<div class="panel-body">
+								<p class="text-center">
+									This project has no members
+								</p>
+							</div>
 						{{else}}
 							<div class="list-group">
 								{{range $mem := .Members}}
@@ -56,15 +57,16 @@
 							</div>
 						{{end}}
 						{{if eq .Project.OwnerID .Context.Account.ID}}
-							<form class="form-inline" method="POST" action="/projects/{{.Project.ID.Hex}}/members/add">
-								<div class="form-group">
-									<label class="sr-only" for="inpEmail">Email address</label>
-									<input type="email" class="form-control" id="inpEmail" placeholder="Email" name="email">
+						<div class="panel-body">
+							<form class="form-horizontal" method="POST" action="/projects/{{.Project.ID.Hex}}/members/add">
+								<div class="form-group form-group-sm" style="margin-bottom: 0;">
+									<div class="col-sm-12">
+										<input type="email" class="form-control" id="inpEmail" placeholder="Email" name="email">
+									</div>
 								</div>
-								<button type="submit" class="btn btn-default">Add</button>
 							</form>
+						</div>
 						{{end}}
-					</div>
 				</div>
 			</div>
 		</div>
