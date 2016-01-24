@@ -62,4 +62,10 @@ func (r *Registry) deregisterAll(sock *glue.Socket) {
 	delete(r.rooms, sock)
 }
 
+func (r *Registry) deliver(room string, data string) {
+	for sock := range r.socks[room] {
+		sock.Write(data)
+	}
+}
+
 var registry = NewRegistry()
