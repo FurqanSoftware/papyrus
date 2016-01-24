@@ -72,6 +72,7 @@ func HandleMemberAdd(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 
 	err := r.ParseForm()

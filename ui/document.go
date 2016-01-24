@@ -15,6 +15,7 @@ func ServeNewDocument(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 	acc := ctx.Account
 
@@ -49,6 +50,7 @@ func HandleDocumentCreate(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 	acc := ctx.Account
 

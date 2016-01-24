@@ -17,6 +17,7 @@ func ServeOrganizationList(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 
 	acc := ctx.Account
@@ -24,13 +25,48 @@ func ServeOrganizationList(w http.ResponseWriter, r *http.Request) {
 	orgs, err := data.ListOraganizationsOwner(acc.ID, 0, math.MaxInt32)
 	catch(r, err)
 
+	mems, err := data.ListMembersAccount(acc.ID, 0, math.MaxInt32)
+	catch(r, err)
+
+	iOrgs := []data.Organization{}
+
+	for _, mem := range mems {
+		found := false
+		for _, org := range orgs {
+			if mem.OrganizationID == org.ID {
+				found = true
+				break
+			}
+		}
+		if found {
+			continue
+		}
+
+		for _, org := range iOrgs {
+			if mem.OrganizationID == org.ID {
+				found = true
+				break
+			}
+		}
+		if found {
+			continue
+		}
+
+		org, err := mem.Organization()
+		catch(r, err)
+
+		iOrgs = append(iOrgs, *org)
+	}
+
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplServeOrganizationList, struct {
-		Context       *Context
-		Organizations []data.Organization
+		Context          *Context
+		Organizations    []data.Organization
+		InvOrganizations []data.Organization
 	}{
-		Context:       ctx,
-		Organizations: orgs,
+		Context:          ctx,
+		Organizations:    orgs,
+		InvOrganizations: iOrgs,
 	})
 }
 
@@ -39,6 +75,7 @@ func ServeOrganizationNew(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
@@ -54,6 +91,7 @@ func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 
 	err := r.ParseForm()
@@ -88,6 +126,7 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 
 	vars := mux.Vars(r)
@@ -129,6 +168,7 @@ func ServeProjectNew(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 
 	vars := mux.Vars(r)
@@ -165,6 +205,7 @@ func HandleProjectCreate(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Account == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 
 	err := r.ParseForm()
