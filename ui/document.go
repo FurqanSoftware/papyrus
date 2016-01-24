@@ -7,6 +7,7 @@ import (
 	"github.com/gophergala2016/papyrus/data"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -143,6 +144,56 @@ func ServeDocument(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func HandleDocumentPublish(w http.ResponseWriter, r *http.Request) {
+
+	ctx := GetContext(r)
+
+	if ctx.Account == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	if !bson.IsObjectIdHex(idStr) {
+		ServeNotFound(w, r)
+		return
+	}
+	id := bson.ObjectIdHex(idStr)
+
+	doc, err := data.GetDocument(id)
+	catch(r, err)
+	if doc == nil {
+		ServeNotFound(w, r)
+		return
+	}
+
+	prj, err := doc.Project()
+	catch(r, err)
+
+	if prj.OwnerID != ctx.Account.ID {
+		ServeForbidden(w, r)
+		return
+	}
+	if doc.Published {
+		http.Redirect(w, r, "/documents/"+doc.ID.Hex(), http.StatusSeeOther)
+		return
+	}
+
+	doc.PublishedAt = doc.ModifiedAt
+	doc.Published = true
+	doc.ShortID, err = data.GenerateShortID()
+	catch(r, err)
+	err = doc.Put()
+	for mgo.IsDup(err) {
+		doc.ShortID, err = data.GenerateShortID()
+		catch(r, err)
+		err = doc.Put()
+	}
+
+	http.Redirect(w, r, "/documents/"+doc.ID.Hex(), http.StatusSeeOther)
+}
+
 func init() {
 	Router.NewRoute().
 		Methods("GET").
@@ -156,4 +207,8 @@ func init() {
 		Methods("GET").
 		Path("/documents/{id}").
 		HandlerFunc(ServeDocument)
+	Router.NewRoute().
+		Methods("POST").
+		Path("/documents/{id}/publish").
+		HandlerFunc(HandleDocumentPublish)
 }

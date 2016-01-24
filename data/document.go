@@ -1,6 +1,7 @@
 package data
 
 import (
+	"crypto/rand"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -31,6 +32,21 @@ func GetDocument(id bson.ObjectId) (*Document, error) {
 		return nil, err
 	}
 	return &doc, nil
+}
+
+const shortIDAlpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func GenerateShortID() (string, error) {
+	b := make([]byte, 6)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	s := []byte{}
+	for _, v := range b {
+		s = append(s, shortIDAlpha[v%62])
+	}
+	return string(s), nil
 }
 
 func ListDocumentsProject(projectID bson.ObjectId, skip, limit int) ([]Document, error) {
