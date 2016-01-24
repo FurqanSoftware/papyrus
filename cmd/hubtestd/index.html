@@ -16,6 +16,8 @@
 		<script src="/assets/ot.js"></script>
 
 		<script type="text/javascript">
+			window.SYNC_DELAY = 100
+
 			function codemirrorDocLength(doc) {
 				return doc.indexFromPos({ line: doc.lastLine(), ch: 0 }) + doc.getLine(doc.lastLine()).length
 			}
@@ -88,7 +90,7 @@
 				if(opsBuf === null || opsBuf.length === 0 || opsWait !== null) {
 					setTimeout(function() {
 						sync()
-					}, 5000)
+					}, window.SYNC_DELAY)
 					return
 				}
 
