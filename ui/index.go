@@ -107,7 +107,7 @@ func ServeDocumentPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplServeDocumentPage, struct {
+	ServeHTMLTemplate(w, r, tplDocumentViewPublic, struct {
 		Document *data.Document
 	}{
 		Document: doc,

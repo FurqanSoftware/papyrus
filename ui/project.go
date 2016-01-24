@@ -54,7 +54,7 @@ func ServeProject(w http.ResponseWriter, r *http.Request) {
 	catch(r, err)
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplServeProject, struct {
+	ServeHTMLTemplate(w, r, tplProjectView, struct {
 		Context   *Context
 		Project   *data.Project
 		Members   []data.Member

@@ -22,14 +22,14 @@ var (
 	tplIndex = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/index.html"))
 	tplLogin = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/login.html"))
 
-	tplServeOrganization     = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationView.html"))
-	tplServeOrganizationList = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationList.html"))
-	tplServeOrganizationNew  = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationNewForm.html"))
+	tplOrganizationList = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationList.html"))
+	tplOrganizationNew  = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/organizationNewForm.html"))
 
-	tplServeProjectNew = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/projectNewForm.html"))
-	tplServeProject    = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/projectView.html"))
+	tplProjectList = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/projectList.html"))
+	tplProjectNew  = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/projectNewForm.html"))
+	tplProjectView = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/projectView.html"))
 
-	tplServeDocumentNew  = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/documentNewForm.html"))
-	tplServeDocument     = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/documentView.html"))
-	tplServeDocumentPage = template.Must(template.ParseFiles("ui/templates/documentPage.html"))
+	tplDocumentNew        = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/documentNewForm.html"))
+	tplDocumentView       = template.Must(template.Must(tplLayout.Clone()).ParseFiles("ui/templates/documentView.html"))
+	tplDocumentViewPublic = template.Must(template.ParseFiles("ui/templates/documentViewPublic.html"))
 )

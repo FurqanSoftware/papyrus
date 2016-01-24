@@ -59,7 +59,7 @@ func ServeOrganizationList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplServeOrganizationList, struct {
+	ServeHTMLTemplate(w, r, tplOrganizationList, struct {
 		Context          *Context
 		Organizations    []data.Organization
 		InvOrganizations []data.Organization
@@ -79,7 +79,7 @@ func ServeOrganizationNew(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplServeOrganizationNew, struct {
+	ServeHTMLTemplate(w, r, tplOrganizationNew, struct {
 		Context *Context
 	}{
 		Context: ctx,
@@ -121,7 +121,7 @@ func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/organizations/"+org.ID.Hex()+"/projects", http.StatusSeeOther)
 }
 
-func ServeOrganization(w http.ResponseWriter, r *http.Request) {
+func ServeProjectList(w http.ResponseWriter, r *http.Request) {
 	ctx := GetContext(r)
 
 	if ctx.Account == nil {
@@ -161,7 +161,7 @@ func ServeOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplServeOrganization, struct {
+	ServeHTMLTemplate(w, r, tplProjectList, struct {
 		Context      *Context
 		Organization *data.Organization
 		Projects     []data.Project
@@ -200,7 +200,7 @@ func ServeProjectNew(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplServeProjectNew, struct {
+	ServeHTMLTemplate(w, r, tplProjectNew, struct {
 		Context      *Context
 		Organization *data.Organization
 	}{
@@ -281,7 +281,7 @@ func init() {
 	Router.NewRoute().Methods("GET").Path("/organizations").HandlerFunc(ServeOrganizationList)
 	Router.NewRoute().Methods("GET").Path("/organizations/new").HandlerFunc(ServeOrganizationNew)
 	Router.NewRoute().Methods("POST").Path("/organizations/new").HandlerFunc(HandleOrganizationCreate)
-	Router.NewRoute().Methods("GET").Path("/organizations/{id}/projects").HandlerFunc(ServeOrganization)
+	Router.NewRoute().Methods("GET").Path("/organizations/{id}/projects").HandlerFunc(ServeProjectList)
 	Router.NewRoute().Methods("GET").Path("/organizations/{id}/projects/new").HandlerFunc(ServeProjectNew)
 	Router.NewRoute().Methods("POST").Path("/organizations/{id}/projects/new").HandlerFunc(HandleProjectCreate)
 }

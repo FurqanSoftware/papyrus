@@ -42,7 +42,7 @@ func ServeNewDocument(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplServeDocumentNew, struct {
+	ServeHTMLTemplate(w, r, tplDocumentNew, struct {
 		Context *Context
 	}{
 		Context: ctx,
@@ -143,7 +143,7 @@ func ServeDocument(w http.ResponseWriter, r *http.Request) {
 	catch(r, err)
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
-	ServeHTMLTemplate(w, r, tplServeDocument, struct {
+	ServeHTMLTemplate(w, r, tplDocumentView, struct {
 		Context  *Context
 		Project  *data.Project
 		Document *data.Document
