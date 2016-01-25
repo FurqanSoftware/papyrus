@@ -9,6 +9,10 @@ describe('opsCompose()', function() {
 	it('Fuubaz -> Fuubarbaz -> Foobarbaz', function() {
 		assert.deepEqual(ot.opsCompose([3, 'bar', 3], [1, -2, 'oo', 6]), [1, -2, 'oo', 'bar', 3])
 	})
+
+	it('(209)sd ada ad (55) -> (181)(-40)(54) -> (181)(-28)(-1)(54)', function() {
+		assert.deepEqual(ot.opsCompose([209, 'sd a da ad ', 55], [181, -40, 54]), [181, -28, -1, 54])
+	})
 })
 
 describe('opsTransform()', function() {

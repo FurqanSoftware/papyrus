@@ -24,6 +24,13 @@ func TestOpsCompose(t *testing.T) {
 			in2: Ops{RetainOp(1), DeleteOp(2), InsertOp("oo"), RetainOp(6)},
 			out: Ops{RetainOp(1), DeleteOp(2), InsertOp("oobar"), RetainOp(3)},
 		},
+
+		//
+		{
+			in1: Ops{RetainOp(209), InsertOp("sd a da ad "), RetainOp(55)},
+			in2: Ops{RetainOp(181), DeleteOp(40), RetainOp(54)},
+			out: Ops{RetainOp(181), DeleteOp(28), DeleteOp(1), RetainOp(54)},
+		},
 	}
 	for i, c := range cases {
 		ops, err := c.in1.Compose(c.in2)
