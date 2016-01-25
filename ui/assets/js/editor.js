@@ -20,7 +20,7 @@ function codemirrorChangeToOps(doc, docLen, ch) {
 	})
 }
 
-var editor = CodeMirror.fromTextArea($('#editor')[0], {
+var editor = CodeMirror.fromTextArea($('#editor').val('')[0], {
 	lineNumbers: true
 })
 var opsBuf = null
@@ -109,6 +109,21 @@ socket.onMessage(function(data) {
 		}
 		break
 	}
+})
+socket.on("connected", function(){
+	$('#connectionStatus').removeClass("fa-ban").addClass("fa-flash")
+})
+socket.on("error", function(){
+	$('#connectionStatus').removeClass("fa-flash").addClass("fa-ban")
+})
+socket.on("disconnected", function(){
+	$('#connectionStatus').removeClass("fa-flash").addClass("fa-ban")
+})
+socket.on("connect_timeout", function(){
+	$('#connectionStatus').removeClass("fa-flash").addClass("fa-ban")
+})
+socket.on("timeout", function(){
+	$('#connectionStatus').removeClass("fa-flash").addClass("fa-ban")
 })
 
 function sync() {
