@@ -6,6 +6,10 @@ Papyrus is a real-time collaborative Markdown editor and document repository wit
 
 As of writing this README.md, [GopherGala 2016](http://gophergala.com/)'s 48 hours is almost up. The core collaborative editing functionality, namely operational transformation and other relevant constructs, have been implemented. The webapp is lacking some functionalities (e.g. removing a member that has been added to a project, deleting a document, etc). At this moment, you can login using a Google or GitHub account, create organizations, create projects, create documents and start editing them collaboratively in real-time.
 
+## Demo
+
+[https://trypapyrus.com](https://trypapyrus.com)
+
 ## Usage
 
 Create a _GOPATH_ for this project:
