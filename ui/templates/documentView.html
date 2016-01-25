@@ -10,6 +10,7 @@
 
 {{define "main"}}
 	<div class="col-md-12">
+		<span id="connectionStatus" class="fa fa-ban pull-right"></span>
 		<div class="btn-toolbar">
 				{{if eq .Project.OwnerID .Context.Account.ID}}
 					<div class="btn-group">

@@ -110,6 +110,21 @@ socket.onMessage(function(data) {
 		break
 	}
 })
+socket.on("connected", function(){
+	$('#connectionStatus').removeClass("fa-ban").addClass("fa-flash")
+})
+socket.on("error", function(){
+	$('#connectionStatus').removeClass("fa-flash").addClass("fa-ban")
+})
+socket.on("disconnected", function(){
+	$('#connectionStatus').removeClass("fa-flash").addClass("fa-ban")
+})
+socket.on("connect_timeout", function(){
+	$('#connectionStatus').removeClass("fa-flash").addClass("fa-ban")
+})
+socket.on("timeout", function(){
+	$('#connectionStatus').removeClass("fa-flash").addClass("fa-ban")
+})
 
 function sync() {
 	if(opsWait !== null || opsBuf === null) {
