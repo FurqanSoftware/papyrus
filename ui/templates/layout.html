@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Papyrus</title>
+		<meta charset="UTF-8">
+
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/yeti/bootstrap.min.css">
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+
+		{{template "styles" .}}
+	</head>
+
+	<body>
+		<div id="wrap">
+			<nav class="navbar navbar-default">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-head">
+							<span class="sr-only"> Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+						<a class="navbar-brand" href="/">Papyrus</a>
+					</div>
+
+					<div class="collapse navbar-collapse" id="navbar-head">
+						{{if .Context.Account}}
+							{{template "user-nav" .}}
+						{{else}}
+							{{template "no-user-nav" .}}
+						{{end}}
+					</div>
+				</div>
+			</nav>
+
+			<div class="container-fluid">
+				<div class="row-fluid">
+					{{template "main" .}}
+				</div>
+			</div>
+		</div>
+
+		<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<script src="/assets/js/common.js"></script>
+		{{template "scripts" .}}
+	</body>
+</html>

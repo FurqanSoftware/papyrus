@@ -1,0 +1,75 @@
+{{define "styles"}}{{end}}
+{{define "main"}}
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-9">
+				{{if eq .Project.OwnerID .Context.Account.ID}}
+					<div class="btn-toolbar">
+						<div class="btn-group">
+							<a class="btn btn-block btn-primary" href="/projects/{{.Project.ID.Hex}}/documents/new">New Document</a>
+						</div>
+					</div>
+				{{end}}
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-9">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<div class="panel-title">
+							{{.Project.Name}}'s Documents
+						</div>
+					</div>
+						{{if eq (len .Documents) 0}}
+							<div class="panel-body">
+								<p class="text-center">
+									There are no documents under this project.
+								</p>
+							</div>
+						{{else}}
+							<div class="list-group">
+								{{range $doc := .Documents}}
+									<a href="/documents/{{$doc.ID.Hex}}" class="list-group-item">{{$doc.Title}}</a>
+								{{end}}
+							</div>
+						{{end}}
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<div class="panel-title">
+							{{.Project.Name}}'s Members
+						</div>
+					</div>
+						{{if eq (len .Members) 0}}
+							<div class="panel-body">
+								<p class="text-center">
+									This project has no members
+								</p>
+							</div>
+						{{else}}
+							<div class="list-group">
+								{{range $mem := .Members}}
+									<li class="list-group-item">{{(($mem.Account).PrimaryEmail).Address}}</li>
+								{{end}}
+							</div>
+						{{end}}
+						{{if eq .Project.OwnerID .Context.Account.ID}}
+						<div class="panel-body">
+							<form class="form-horizontal" method="POST" action="/projects/{{.Project.ID.Hex}}/members/add">
+								<div class="form-group form-group-sm" style="margin-bottom: 0;">
+									<div class="col-sm-12">
+										<input type="email" class="form-control" id="inpEmail" placeholder="Email" name="email">
+									</div>
+								</div>
+							</form>
+						</div>
+						{{end}}
+				</div>
+			</div>
+		</div>
+	</div>
+{{end}}
+{{define "scripts"}}{{end}}

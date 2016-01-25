@@ -1,0 +1,33 @@
+{{define "styles"}}{{end}}
+{{define "main"}}
+	<div class="col-md-9">
+		<div class="btn-toolbar">
+			<div class="btn-group">
+				<a class="btn btn-block btn-primary" href="/organizations/new">New Organization</a>
+			</div>
+		</div>
+		<br>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				Organizations
+			</div>
+				{{if and (eq (len .Organizations) 0) (eq (len .InvOrganizations) 0)}}
+					<div class="panel-body">
+						<p class="text-center">
+							You don't have any organization
+						</p>
+					</div>
+				{{else}}
+					<div class="list-group">
+						{{range $org := .Organizations}}
+							<a href="/organizations/{{$org.ID.Hex}}/projects" class="list-group-item">{{$org.Name}}</a>
+						{{end}}
+						{{range $org := .InvOrganizations}}
+							<a href="/organizations/{{$org.ID.Hex}}/projects" class="list-group-item">{{$org.Name}}</a>
+						{{end}}
+					</div>
+				{{end}}
+		</div>
+	</div>
+{{end}}
+{{define "scripts"}}{{end}}

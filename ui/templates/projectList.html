@@ -1,0 +1,32 @@
+{{define "styles"}}{{end}}
+{{define "main"}}
+	<div class="col-md-9">
+		{{if eq .Organization.OwnerID .Context.Account.ID}}
+			<div class="btn-toolbar">
+				<div class="btn-group">
+					<a class="btn btn-block btn-primary" href="/organizations/{{.Organization.ID.Hex}}/projects/new">New Project</a>
+				</div>
+			</div>
+		{{end}}
+		<br>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				{{.Organization.Name}}'s Projects
+			</div>
+				{{if eq (len .Projects) 0}}
+					<div class="panel-body">
+						<p class="text-center">
+							You do not have any project under this organization
+						</p>
+					</div>
+				{{else}}
+					<div class="list-group">
+						{{range $prj := .Projects}}
+							<a href="/projects/{{$prj.ID.Hex}}" class="list-group-item">{{$prj.Name}}</a>
+						{{end}}
+					</div>
+				{{end}}
+		</div>
+	</div>
+{{end}}
+{{define "scripts"}}{{end}}
