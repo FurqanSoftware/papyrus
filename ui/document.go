@@ -41,11 +41,18 @@ func ServeNewDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := prj.Organization()
+	catch(r, err)
+
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplDocumentNew, struct {
-		Context *Context
+		Context      *Context
+		Organization *data.Organization
+		Project      *data.Project
 	}{
-		Context: ctx,
+		Context:      ctx,
+		Organization: org,
+		Project:      prj,
 	})
 }
 
@@ -135,6 +142,9 @@ func ServeDocument(w http.ResponseWriter, r *http.Request) {
 	prj, err := doc.Project()
 	catch(r, err)
 
+	org, err := prj.Organization()
+	catch(r, err)
+
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["accountID"] = ctx.Account.ID.Hex()
 	token.Claims["documentID"] = doc.ID.Hex()
@@ -144,15 +154,17 @@ func ServeDocument(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplDocumentView, struct {
-		Context  *Context
-		Project  *data.Project
-		Document *data.Document
-		Token    string
+		Context      *Context
+		Organization *data.Organization
+		Project      *data.Project
+		Document     *data.Document
+		Token        string
 	}{
-		Context:  ctx,
-		Project:  prj,
-		Document: doc,
-		Token:    tokenString,
+		Context:      ctx,
+		Organization: org,
+		Project:      prj,
+		Document:     doc,
+		Token:        tokenString,
 	})
 }
 

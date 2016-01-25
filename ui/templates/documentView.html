@@ -4,6 +4,12 @@
 
 {{define "main"}}
 	<div class="col-md-12">
+		<ol class="breadcrumb">
+			<li><a href="/organizations/{{.Organization.ID.Hex}}/projects">{{.Organization.Name}}</a></li>
+			<li><a href="/projects/{{.Project.ID.Hex}}">{{.Project.Name}}</a></li>
+			<li class="active">{{.Document.Title}}</li>
+		</ol>
+		<span id="connectionStatus" class="fa fa-ban pull-right"></span>
 		<div class="btn-toolbar">
 				{{if eq .Project.OwnerID .Context.Account.ID}}
 					<div class="btn-group">

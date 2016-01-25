@@ -1,6 +1,11 @@
 {{define "styles"}}{{end}}
 {{define "main"}}
 	<div class="col-md-9">
+		<ol class="breadcrumb">
+			<li><a href="/organizations/{{.Organization.ID.Hex}}/projects">{{.Organization.Name}}</a></li>
+			<li><a href="/projects/{{.Project.ID.Hex}}">{{.Project.Name}}</a></li>
+			<li class="active">New document</li>
+		</ol>
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<div class="panel-title">
