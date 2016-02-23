@@ -2,7 +2,7 @@
 	"ImportPath": "github.com/gophergala2016/papyrus",
 	"GoVersion": "go1.6",
 	"Packages": [
-		"./..."
+		"./cmd/papyrusd"
 	],
 	"Deps": [
 		{
