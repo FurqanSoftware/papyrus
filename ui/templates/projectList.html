@@ -1,6 +1,9 @@
 {{define "styles"}}{{end}}
 {{define "main"}}
 	<div class="col-md-9">
+		<ol class="breadcrumb">
+			<li class="active">{{.Organization.Name}}</li>
+		</ol>
 		{{if eq .Organization.OwnerID .Context.Account.ID}}
 			<div class="btn-toolbar">
 				<div class="btn-group">

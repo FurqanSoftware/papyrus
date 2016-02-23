@@ -50,24 +50,24 @@ func (h *Hub) processAttachIn() {
 		})
 		if err != nil {
 			h.sendError(v.Socket, "invalid token")
-			return
+			continue
 		}
 		docID, ok := token.Claims["documentID"].(string)
 		if !ok {
 			h.sendError(v.Socket, "invalid token")
-			return
+			continue
 		}
 
 		err = h.nexus.attach(v.Socket, docID)
 		if err != nil {
 			h.sendError(v.Socket, "internal server error")
-			return
+			continue
 		}
 
 		_, ok = h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not found")
-			return
+			continue
 		}
 
 		h.attachOutCh <- AttachOut{
@@ -81,13 +81,13 @@ func (h *Hub) processAttachOut() {
 		doc, ok := h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not attached")
-			return
+			continue
 		}
 
 		b, err := json.Marshal(NewChangeData(doc.Head()))
 		if err != nil {
 			h.sendError(v.Socket, "internal server error")
-			return
+			continue
 		}
 		v.Socket.Write("change " + string(b))
 	}
@@ -98,13 +98,13 @@ func (h *Hub) processChangeIn() {
 		doc, ok := h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not found")
-			return
+			continue
 		}
 
 		ch, err := doc.Apply(v.Change)
 		if err != nil {
 			h.sendError(v.Socket, "invalid change")
-			return
+			continue
 		}
 
 		h.changeOutCh <- ChangeOut{
@@ -119,7 +119,7 @@ func (h *Hub) processChangeOut() {
 		doc, ok := h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not attached")
-			return
+			continue
 		}
 
 		h.nexus.broadcast(doc.ID, NewChangeData(v.Change))

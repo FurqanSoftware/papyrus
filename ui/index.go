@@ -116,7 +116,7 @@ func ServeDocumentPage(w http.ResponseWriter, r *http.Request) {
 func init() {
 	goth.UseProviders(
 		gplus.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), os.Getenv("BASE")+"/login/gplus/callback", "email"),
-		github.New(os.Getenv("GITHUB_CLIENT_ID"), os.Getenv("GITHUB_CLIENT_SECRET"), os.Getenv("BASE")+"/login/github/callback"),
+		github.New(os.Getenv("GITHUB_CLIENT_ID"), os.Getenv("GITHUB_CLIENT_SECRET"), os.Getenv("BASE")+"/login/github/callback", "user:email"),
 	)
 
 	gothic.Store = store

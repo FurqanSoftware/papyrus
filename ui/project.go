@@ -50,20 +50,25 @@ func ServeProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	org, err := prj.Organization()
+	catch(r, err)
+
 	docs, err := data.ListDocumentsProject(prj.ID, 0, math.MaxInt32)
 	catch(r, err)
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".html"))
 	ServeHTMLTemplate(w, r, tplProjectView, struct {
-		Context   *Context
-		Project   *data.Project
-		Members   []data.Member
-		Documents []data.Document
+		Context      *Context
+		Organization *data.Organization
+		Project      *data.Project
+		Members      []data.Member
+		Documents    []data.Document
 	}{
-		Context:   ctx,
-		Project:   prj,
-		Members:   mems,
-		Documents: docs,
+		Context:      ctx,
+		Organization: org,
+		Project:      prj,
+		Members:      mems,
+		Documents:    docs,
 	})
 }
 
