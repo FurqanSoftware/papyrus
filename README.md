@@ -8,7 +8,7 @@ As of writing this README.md, [GopherGala 2016](http://gophergala.com/)'s 48 hou
 
 ## Demo
 
-[http://trypapyrus.com](http://trypapyrus.com)
+[https://gophergala2016-papyrus.herokuapp.com/](https://gophergala2016-papyrus.herokuapp.com/)
 
 ## Usage
 
