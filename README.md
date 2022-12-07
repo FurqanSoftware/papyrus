@@ -6,9 +6,9 @@ Papyrus is a real-time collaborative Markdown editor and document repository wit
 
 As of writing this README.md, [GopherGala 2016](http://gophergala.com/)'s 48 hours is almost up. The core collaborative editing functionality, namely operational transformation and other relevant constructs, have been implemented. The webapp is lacking some functionalities (e.g. removing a member that has been added to a project, deleting a document, etc). At this moment, you can login using a Google or GitHub account, create organizations, create projects, create documents and start editing them collaboratively in real-time.
 
-## Demo
+<!-- ## Demo
 
-[https://gophergala2016-papyrus.herokuapp.com/](https://gophergala2016-papyrus.herokuapp.com/)
+[https://gophergala2016-papyrus.herokuapp.com/](https://gophergala2016-papyrus.herokuapp.com/) -->
 
 ## Usage
 
@@ -37,7 +37,7 @@ $ go get -v ./...
 Build _papyrusd_ binary:
 
 ```
-$ go install ./cmd/papyrusd
+$ go build ./cmd/papyrusd
 ```
 
 Set necessary environment variables (see _env-sample.txt_):
@@ -53,13 +53,15 @@ $ export GOOGLE_CLIENT_ID=your-google-client-id-here
 $ export GOOGLE_CLIENT_SECRET=your-google-client-secret-here
 ```
 
+Make sure MongoDB is running and all necessary environment variables are set.
+
 Run _papyrusd_:
 
 ```
-$GOPATH/bin/papyrusd
+./papyrusd
 ```
 
-Make sure MongoDB is running and all necessary environment variables are set.
+Open your web browser and navigate to [localhost:5000](http://localhost:5000).
 
 ## Acknowledgements
 
@@ -70,4 +72,4 @@ Make sure MongoDB is running and all necessary environment variables are set.
 
 ## License
 
-Loadcat is available under the [BSD (3-Clause) License](http://opensource.org/licenses/BSD-3-Clause).
+Papyrus is available under the [BSD (3-Clause) License](http://opensource.org/licenses/BSD-3-Clause).
