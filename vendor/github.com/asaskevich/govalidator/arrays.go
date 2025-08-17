@@ -9,6 +9,35 @@ type ResultIterator func(interface{}, int) interface{}
 // ConditionIterator is the function that accepts element of slice/array and its index and returns boolean
 type ConditionIterator func(interface{}, int) bool
 
+// ReduceIterator is the function that accepts two element of slice/array and returns result of merging those values
+type ReduceIterator func(interface{}, interface{}) interface{}
+
+// Some validates that any item of array corresponds to ConditionIterator. Returns boolean.
+func Some(array []interface{}, iterator ConditionIterator) bool {
+	res := false
+	for index, data := range array {
+		res = res || iterator(data, index)
+	}
+	return res
+}
+
+// Every validates that every item of array corresponds to ConditionIterator. Returns boolean.
+func Every(array []interface{}, iterator ConditionIterator) bool {
+	res := true
+	for index, data := range array {
+		res = res && iterator(data, index)
+	}
+	return res
+}
+
+// Reduce boils down a list of values into a single value by ReduceIterator
+func Reduce(array []interface{}, iterator ReduceIterator, initialValue interface{}) interface{} {
+	for _, data := range array {
+		initialValue = iterator(initialValue, data)
+	}
+	return initialValue
+}
+
 // Each iterates over the slice and apply Iterator to every item
 func Each(array []interface{}, iterator Iterator) {
 	for index, data := range array {
@@ -18,7 +47,7 @@ func Each(array []interface{}, iterator Iterator) {
 
 // Map iterates over the slice and apply ResultIterator to every item. Returns new slice as a result.
 func Map(array []interface{}, iterator ResultIterator) []interface{} {
-	var result []interface{} = make([]interface{}, len(array))
+	var result = make([]interface{}, len(array))
 	for index, data := range array {
 		result[index] = iterator(data, index)
 	}
@@ -37,7 +66,7 @@ func Find(array []interface{}, iterator ConditionIterator) interface{} {
 
 // Filter iterates over the slice and apply ConditionIterator to every item. Returns new slice.
 func Filter(array []interface{}, iterator ConditionIterator) []interface{} {
-	var result []interface{} = make([]interface{}, 0)
+	var result = make([]interface{}, 0)
 	for index, data := range array {
 		if iterator(data, index) {
 			result = append(result, data)

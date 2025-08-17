@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package gorilla/sessions provides cookie and filesystem sessions and
+Package sessions provides cookie and filesystem sessions and
 infrastructure for custom session backends.
 
 The key features are:
@@ -26,14 +26,18 @@ Let's start with an example that shows the sessions API in a nutshell:
 		"github.com/gorilla/sessions"
 	)
 
-	var store = sessions.NewCookieStore([]byte("something-very-secret"))
+	// Note: Don't store your key in your source code. Pass it via an
+	// environmental variable, or flag (or both), and don't accidentally commit it
+	// alongside your code. Ensure your key is sufficiently random - i.e. use Go's
+	// crypto/rand or securecookie.GenerateRandomKey(32) and persist the result.
+	// Ensure SESSION_KEY exists in the environment, or sessions will fail.
+	var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
 	func MyHandler(w http.ResponseWriter, r *http.Request) {
-		// Get a session. We're ignoring the error resulted from decoding an
-		// existing session: Get() always returns a session, even if empty.
+		// Get a session. Get() always returns a session, even if empty.
 		session, err := store.Get(r, "session-name")
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -41,7 +45,11 @@ Let's start with an example that shows the sessions API in a nutshell:
 		session.Values["foo"] = "bar"
 		session.Values[42] = 43
 		// Save it before we write to the response/return from the handler.
-		session.Save(r, w)
+		err = session.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 First we initialize a session store calling NewCookieStore() and passing a
@@ -56,14 +64,6 @@ session.Save(r, w), and either display an error message or otherwise handle it.
 Save must be called before writing to the response, otherwise the session
 cookie will not be sent to the client.
 
-Important Note: If you aren't using gorilla/mux, you need to wrap your handlers
-with context.ClearHandler as or else you will leak memory! An easy way to do this
-is to wrap the top-level mux when calling http.ListenAndServe:
-
-    http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux))
-
-The ClearHandler function is provided by the gorilla/context package.
-
 That's all you need to know for the basic usage. Let's take a look at other
 options, starting with flash messages.
 
@@ -76,18 +76,22 @@ flashes, call session.Flashes(). Here is an example:
 		// Get a session.
 		session, err := store.Get(r, "session-name")
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		// Get the previously flashes, if any.
+		// Get the previous flashes, if any.
 		if flashes := session.Flashes(); len(flashes) > 0 {
 			// Use the flash values.
 		} else {
 			// Set a new flash.
 			session.AddFlash("Hello, flash messages world!")
 		}
-		session.Save(r, w)
+		err = session.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 Flash messages are useful to set information to be read after a redirection,
@@ -118,10 +122,10 @@ so it is easy to register new datatypes for storage in sessions:
 	}
 
 As it's not possible to pass a raw type as a parameter to a function, gob.Register()
-relies on us passing it an empty pointer to the type as a parameter. In the example
-above we've passed it a pointer to a struct and a pointer to a custom type
-representing a map[string]interface. This will then allow us to serialise/deserialise
-values of those types to and from our sessions.
+relies on us passing it a value of the desired type. In the example above we've passed
+it a pointer to a struct and a pointer to a custom type representing a
+map[string]interface. (We could have passed non-pointer values if we wished.) This will
+then allow us to serialise/deserialise values of those types to and from our sessions.
 
 Note that because session values are stored in a map[string]interface{}, there's
 a need to type-assert data when retrieving it. We'll use the Person struct we registered above:
@@ -129,7 +133,7 @@ a need to type-assert data when retrieving it. We'll use the Person struct we re
 	func MyHandler(w http.ResponseWriter, r *http.Request) {
 		session, err := store.Get(r, "session-name")
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -190,7 +194,11 @@ at once: it's sessions.Save(). Here's an example:
 		session2, _ := store.Get(r, "session-two")
 		session2.Values[42] = 43
 		// Save all sessions.
-		sessions.Save(r, w)
+		err = sessions.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 This is possible because when we call Get() from a session store, it adds the

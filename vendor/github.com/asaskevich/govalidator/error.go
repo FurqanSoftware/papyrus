@@ -1,24 +1,47 @@
 package govalidator
 
+import (
+	"sort"
+	"strings"
+)
+
+// Errors is an array of multiple errors and conforms to the error interface.
 type Errors []error
 
+// Errors returns itself.
 func (es Errors) Errors() []error {
 	return es
 }
 
 func (es Errors) Error() string {
-	var err string
+	var errs []string
 	for _, e := range es {
-		err += e.Error() + ";"
+		errs = append(errs, e.Error())
 	}
-	return err
+	sort.Strings(errs)
+	return strings.Join(errs, ";")
 }
 
+// Error encapsulates a name, an error and whether there's a custom error message or not.
 type Error struct {
-	Name string
-	Err  error
+	Name                     string
+	Err                      error
+	CustomErrorMessageExists bool
+
+	// Validator indicates the name of the validator that failed
+	Validator string
+	Path      []string
 }
 
 func (e Error) Error() string {
-	return e.Name + ": " + e.Err.Error()
+	if e.CustomErrorMessageExists {
+		return e.Err.Error()
+	}
+
+	errName := e.Name
+	if len(e.Path) > 0 {
+		errName = strings.Join(append(e.Path, e.Name), ".")
+	}
+
+	return errName + ": " + e.Err.Error()
 }

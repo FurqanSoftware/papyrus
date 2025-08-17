@@ -1,7 +1,10 @@
 # Glue - Robust Go and Javascript Socket Library
+
+[![GoDoc](https://godoc.org/github.com/desertbit/glue?status.svg)](https://godoc.org/github.com/desertbit/glue)
+[![Go Report Card](https://goreportcard.com/badge/github.com/desertbit/glue)](https://goreportcard.com/report/github.com/desertbit/glue)
 [![Join the chat at https://gitter.im/desertbit/glue](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/desertbit/glue?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Glue is a real-time bidirectional socket library. It is a **clean**, **robust** and **efficient** alternative to [socket.io](http://socket.io/). This library is designed to connect webbrowsers with a go-backend in a simple way. It automatically detects supported socket layers and chooses the most suitable one. This library handles automatic reconnections on disconnections and handles caching to bridge those disconnections. The server implementation is **thread-safe**.
+Glue is a real-time bidirectional socket library. It is a **clean**, **robust** and **efficient** alternative to [socket.io](http://socket.io/). This library is designed to connect webbrowsers with a go-backend in a simple way. It automatically detects supported socket layers and chooses the most suitable one. This library handles automatic reconnections on disconnections and handles caching to bridge those disconnections. The server implementation is **thread-safe** and **stable**. The API is **fixed** and there won't be any breaking API changes.
 
 ## Socket layers
 Currently two socket layers are supported:
@@ -13,7 +16,7 @@ Feel free to contribute to this project. Please check the [TODO](TODO.md) file f
 
 ## Install
 ### Client
-The client javascript Glue library is located in **[client/dist/glue.js](client/dist/glue.js)**. It requires jQuery.
+The client javascript Glue library is located in **[client/dist/glue.js](client/dist/glue.js)**.
 
 You can use bower to install the client library:
 
@@ -113,7 +116,7 @@ socket.send(data, discardCallback);
 socket.onMessage(f);
 
 // on binds event functions to events.
-// This function is equivalent to jQuery's on method.
+// This function is equivalent to jQuery's on method syntax.
 // Following events are available:
 //  - "connected"
 //  - "connecting"
@@ -247,6 +250,12 @@ c.onMessage(function(data) {
 
 c.send("Hello World");
 ```
+
+### Broadcasting Messages
+
+With Glue it is easy to broadcast messages to multiple clients. The Glue Server keeps track of all active connected client sessions.
+You can make use of the server **Sockets**, **GetSocket** or **OnNewSocket** methods to implement broadcasting.
+
 
 ## Example
 This socket library is very straightforward to use. Check the [sample directory](sample) for more examples.

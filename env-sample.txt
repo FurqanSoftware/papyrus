@@ -1,9 +1,9 @@
-SECRET=
+SECRET=keyboardcat
 
-ADDR=
-BASE=
+ADDR=:15000
+BASE=http://localhost
 
-MONGO_URL=
+MONGO_URL=mongodb://mongo/papyrus
 
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=

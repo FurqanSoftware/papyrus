@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"log"
 	"net"
 	"net/http"
@@ -10,7 +11,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/gophergala2016/papyrus/data"
-	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
@@ -50,7 +50,7 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Account = acc
 	}
 
-	context.Set(r, "context", &ctx)
+	r = r.WithContext(context.WithValue(r.Context(), "context", &ctx))
 
 	func() {
 		defer func() {
@@ -68,7 +68,6 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					panic(err)
 				}
 			}
-			context.Clear(r)
 		}()
 		s.Router.ServeHTTP(w, r)
 	}()

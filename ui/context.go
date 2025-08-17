@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gophergala2016/papyrus/data"
-	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 )
 
@@ -16,6 +15,6 @@ type Context struct {
 }
 
 func GetContext(r *http.Request) *Context {
-	ctx, _ := context.Get(r, "context").(*Context)
+	ctx, _ := r.Context().Value("context").(*Context)
 	return ctx
 }
