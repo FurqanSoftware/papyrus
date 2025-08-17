@@ -1,0 +1,24 @@
+services:
+  papyrus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "0.0.0.0:15000:15000"
+    volumes:
+      - .:/opt/papyrus
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    working_dir: /opt/papyrus
+    command: ./papyrusd
+    environment:
+      SECRET: keyboardcat
+      ADDR: :15000
+      BASE: http://localhost
+      MONGO_URL: mongodb://mongo/papyrus
+    env_file: .env
+
+  mongo:
+    image: mongo:5
