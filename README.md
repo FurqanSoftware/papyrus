@@ -6,62 +6,33 @@ Papyrus is a real-time collaborative Markdown editor and document repository wit
 
 As of writing this README.md, [GopherGala 2016](http://gophergala.com/)'s 48 hours is almost up. The core collaborative editing functionality, namely operational transformation and other relevant constructs, have been implemented. The webapp is lacking some functionalities (e.g. removing a member that has been added to a project, deleting a document, etc). At this moment, you can login using a Google or GitHub account, create organizations, create projects, create documents and start editing them collaboratively in real-time.
 
-<!-- ## Demo
-
-[https://gophergala2016-papyrus.herokuapp.com/](https://gophergala2016-papyrus.herokuapp.com/) -->
-
 ## Usage
-
-Create a _GOPATH_ for this project:
-
-```
-$ mkdir -p Papyrus
-$ cd Papyrus
-$ export GOPATH=`pwd`
-```
 
 Clone this repository:
 
-```
-$ mkdir -p src/github.com/gophergala2016/papyrus
-$ cd src/github.com/gophergala2016/papyrus
-$ git clone https://github.com/gophergala2016/papyrus.git .
+``` sh
+git clone https://github.com/gophergala2016/papyrus.git .
 ```
 
-Install dependencies:
+Build _papyrusd_ binary (after `cd`-ing into the directory):
 
-```
-$ go get -v ./...
-```
-
-Build _papyrusd_ binary:
-
-```
-$ go build ./cmd/papyrusd
+``` sh
+go build ./cmd/papyrusd
 ```
 
-Set necessary environment variables (see _env-sample.txt_):
+Create a `.env` file and update it as needed:
 
-```
-$ export ADDR=:5000
-$ export SECRET=some-long-secret
-$ export BASE=http://localhost:5000
-$ export MONGO_URL=mongodb://localhost/papyrus
-$ export GITHUB_CLIENT_ID=your-github-client-id-here
-$ export GITHUB_CLIENT_SECRET=your-github-client-secret-here
-$ export GOOGLE_CLIENT_ID=your-google-client-id-here
-$ export GOOGLE_CLIENT_SECRET=your-google-client-secret-here
+``` sh
+cp env-sample.txt .env
 ```
 
-Make sure MongoDB is running and all necessary environment variables are set.
+Start Papyrus using `docker-compose`:
 
-Run _papyrusd_:
-
-```
-./papyrusd
+``` sh
+docker-compose up
 ```
 
-Open your web browser and navigate to [localhost:5000](http://localhost:5000).
+Open your web browser and navigate to [localhost:15000](http://localhost:15000).
 
 ## Acknowledgements
 
