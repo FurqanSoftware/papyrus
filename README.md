@@ -2,7 +2,7 @@
 
 Papyrus is a real-time collaborative Markdown editor and document repository with simple organization and project-based management. At [Furqan Software](https://furqansoftware.com) we always wanted a simple way to collaborate on Markdown documents and Papyrus is our stab at fulfilling that need.
 
-![Obligatory GIF](http://i.imgur.com/WhQqbFA.gif)
+![Obligatory GIF](demo.gif)
 
 As of writing this README.md, [GopherGala 2016](http://gophergala.com/)'s 48 hours is almost up. The core collaborative editing functionality, namely operational transformation and other relevant constructs, have been implemented. The webapp is lacking some functionalities (e.g. removing a member that has been added to a project, deleting a document, etc). At this moment, you can login using a Google or GitHub account, create organizations, create projects, create documents and start editing them collaboratively in real-time.
 
