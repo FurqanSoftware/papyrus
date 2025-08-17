@@ -7,7 +7,7 @@ toolchain go1.24.6
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/desertbit/glue v0.0.0-20190619185959-06de07e1e404
-	github.com/dgrijalva/jwt-go v2.4.1-0.20151230180000-afef698c326b+incompatible
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/schema v1.4.1
 	github.com/gorilla/sessions v1.4.0

@@ -9,6 +9,7 @@ import (
 
 	"github.com/desertbit/glue"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gophergala2016/papyrus/auth"
 	"github.com/gophergala2016/papyrus/ot"
 )
 
@@ -41,7 +42,8 @@ func New(repo Repo) *Hub {
 
 func (h *Hub) processAttachIn() {
 	for v := range h.attachInCh {
-		token, err := jwt.Parse(v.Token, func(token *jwt.Token) (interface{}, error) {
+		claims := auth.Claims{}
+		_, err := jwt.ParseWithClaims(v.Token, &claims, func(token *jwt.Token) (interface{}, error) {
 			_, ok := token.Method.(*jwt.SigningMethodHMAC)
 			if !ok {
 				return nil, errors.New("unexpected signing method")
@@ -52,19 +54,14 @@ func (h *Hub) processAttachIn() {
 			h.sendError(v.Socket, "invalid token")
 			continue
 		}
-		docID, ok := token.Claims["documentID"].(string)
-		if !ok {
-			h.sendError(v.Socket, "invalid token")
-			continue
-		}
 
-		err = h.nexus.attach(v.Socket, docID)
+		err = h.nexus.attach(v.Socket, claims.DocumentID)
 		if err != nil {
 			h.sendError(v.Socket, "internal server error")
 			continue
 		}
 
-		_, ok = h.nexus.sockDoc[v.Socket]
+		_, ok := h.nexus.sockDoc[v.Socket]
 		if !ok {
 			h.sendError(v.Socket, "not found")
 			continue

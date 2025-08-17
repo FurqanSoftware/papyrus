@@ -14,7 +14,7 @@ github.com/desertbit/glue/backend/sockets/ajaxsocket
 github.com/desertbit/glue/backend/sockets/websocket
 github.com/desertbit/glue/log
 github.com/desertbit/glue/utils
-# github.com/dgrijalva/jwt-go v2.4.1-0.20151230180000-afef698c326b+incompatible
+# github.com/dgrijalva/jwt-go v3.2.0+incompatible
 ## explicit
 github.com/dgrijalva/jwt-go
 # github.com/go-chi/chi/v5 v5.1.0
