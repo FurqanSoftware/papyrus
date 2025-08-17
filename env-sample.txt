@@ -1,5 +1,6 @@
 SECRET=
 
+ADDR=
 BASE=
 
 MONGO_URL=
