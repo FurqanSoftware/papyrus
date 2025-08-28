@@ -66,6 +66,7 @@ func HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		nAcc := data.Account{}
 		nAcc.Emails = append(nAcc.Emails, accEmail)
 		err = nAcc.Put()
+		catch(r, err)
 
 		acc = &nAcc
 	}
@@ -125,8 +126,7 @@ func init() {
 		return r.URL.Query().Get("state")
 	}
 	gothic.GetProviderName = func(r *http.Request) (string, error) {
-		provider, _ := mux.Vars(r)["provider"]
-		return provider, nil
+		return mux.Vars(r)["provider"], nil
 	}
 
 	Router.NewRoute().

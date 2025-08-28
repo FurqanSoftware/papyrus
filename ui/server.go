@@ -50,7 +50,7 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Account = acc
 	}
 
-	r = r.WithContext(context.WithValue(r.Context(), "context", &ctx))
+	r = r.WithContext(context.WithValue(r.Context(), contextKeyContext, &ctx))
 
 	func() {
 		defer func() {

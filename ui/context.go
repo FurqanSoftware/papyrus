@@ -15,6 +15,10 @@ type Context struct {
 }
 
 func GetContext(r *http.Request) *Context {
-	ctx, _ := r.Context().Value("context").(*Context)
+	ctx, _ := r.Context().Value(contextKeyContext).(*Context)
 	return ctx
 }
+
+type contextKey struct{}
+
+var contextKeyContext = contextKey{}
